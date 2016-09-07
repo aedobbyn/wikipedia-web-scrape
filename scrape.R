@@ -1,12 +1,20 @@
-#' webs_scrape/scrape.R
-#' Amanda Dobbyn
+#' ---
+#' title: "Ireland Web Scrape"
+#' author: 
+#'  name: "Amanda Dobbyn"
+#'  email: aedobbyn@uchicago.edu
+#' output:
+#'  html_document:
+#'    keep_md: true
+#' ---
+
+
 #' Last updated: `r Sys.time()`  
- 
 
 #' Inspiration from https://github.com/daattali/UBC-STAT545/blob/master/hw/hw12_web-scraping-api/hw12_web-scraping-api.R  
 #' and https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
 
-#' Using knitr::spin   
+#' This doc compiled using knitr::spin   
 
 #+ Set working directory
 setwd(getwd())
@@ -21,6 +29,7 @@ p_load(knitr,  # for weaving this into pretty format
        tibble,  # for an easier way to work with data.frames
        dplyr,  # for data manipulation
        tm,  # for text mining
+       readr,  # for parse_number()
        stringr,  # for string manipulation
        stringi,  # for string manipulation
        lubridate,  # for dates
@@ -28,6 +37,7 @@ p_load(knitr,  # for weaving this into pretty format
        data.table,  # for 
        DT,  # for kable()
        ggplot2,  # for plots
+       ggvis,  # for plots
        ggrepel  # for spreading point labels
 )
 
@@ -64,7 +74,7 @@ gdp <- gdp %>%
   )
 gdp
 
-#' #' Take out last row with totals
+#' Take out last row with totals
 gdp <- gdp[1:(nrow(gdp) - 1), ]
 
 #' Check out table structure
@@ -79,8 +89,10 @@ gdp$GDP <- str_replace_all(gdp$GDP, "bn", "")
 gdp$GDP_percap <- str_replace_all(gdp$GDP_percap, "€", "")
 
 
+# Copy our dataframe
 gdp2 <- gdp
-#' Replace "m" (in Population) with scientific notation
+
+#' Replace `m` (in Population) with scientific notation
 gdp2$Population <- gdp$Population %>% 
   gsub(" m", "e+06", .) 
 gdp2$Population
@@ -130,7 +142,10 @@ gdp4 %>%
 
 
 
-#' ## Thoughts on better ways to replace the "1.3 m" population
+
+
+
+#' Thoughts on better ways to replace the "1.3 m" population
 # gdp2$population <- if("e" %in% gdp2$population) {as.numeric(gdp2$population)}
 
 # repl.m <- function(pop) {
@@ -146,9 +161,14 @@ gdp4 %>%
 
 
 
-
-
-
+#' *** 
+#' .
+#' .
+#' .
+#' # Adventures in text munging
+#' .
+#' .
+#' .
 
 #' ***
   
@@ -163,13 +183,15 @@ wiki_text <-
 #+ eval=FALSE
 head(wiki_text)
 
-#' We actually have a list of paragraphs because we used the "p" tag in html_nodes()
+#' We actually have a list of paragraphs because we used the `<p>` tag in `html_nodes()`
 is.list(wiki_text)  # why does this return `FALSE`?
 length(wiki_text)  # so we have 156 paragraphs
+
+#' The third paragraph
 wiki_text[[3]]
 
-#' Combine our lists to one vector
-#' Note that just doing unlist(wiki_text) doesn't work
+#' Combine our lists to one vector 
+#' Note that just doing `unlist(wiki_text)` doesn't work
 ireland <- NULL
 for (i in 2:(length(wiki_text))) {   # omit first paragraph
   ireland <- paste(ireland, as.character(wiki_text[i]), sep = ' ')
