@@ -1,6 +1,8 @@
-#' scrape.R
+#' webs_scrape/scrape.R
 #' Amanda Dobbyn
 #' Last updated: `r Sys.time()`
+ 
+#' Using knitr::spin 
 
 #+ Set working directory
 setwd(getwd())
@@ -21,39 +23,57 @@ p_load(knitr,  # for weaving this into pretty format
        ggrepel  # for spreading point labels
 )
 
+#' Set page we want to scrape
+#+
 wiki_url <- "https://en.wikipedia.org/wiki/Ireland"
 wiki_page <- read_html(wiki_url)
+
+#' Scrape both tables
+#' A "view page source" and command+F shows that this table is actually 
+#' `<table class="wikitable sortable">` and the smaller table is just 
+#' `<table class="wikitable">` but using `html_nodes(".wikitable sortable")`
+#' returns an empy list
+#+
 wiki_table <- 
   wiki_page %>%
-  html_nodes("table") %>%
-  html_table(fill = TRUE)
+  html_nodes(".wikitable") %>%
+  html_table()
+
+#' Check out what we've scraped. Looks like two tables.
+#+
 wiki_table
-length(wiki_table)
+length(wiki_table) # a list of 2
 
+#' Select the table we want
+#+
+gdp <- wiki_table[[2]]
 
+#' ***
+  
+#' Scrape all text (excluding citations) from the Wikipedia page
+#+
 wiki_text <-
   wiki_page %>% 
   html_nodes("p") %>% 
   html_text
+
+#' Check out our text
+#+
 head(wiki_text)
 
+#' Take out [citation_number]
+#+
+txt <- wiki_text %>% 
+  str_replace_all(
+    "[:digit:]", ""
+  )
+head(txt)
 
-ireland <- wiki_table %>% 
-  select(-grep("")
-           )
+# txt <- str_replace_all(txt, "[^a-zA-Z ]","") #only keep letters
+# 
+# 
+# str_replace_all(myText,"[:digit:]","")
 
-
--grep("(Rank)|(Source)|(Expenditure.*per capita)|(Year)",
-      colnames(.),
-      ignore.case = TRUE))
-  
-
-wikiRnDPageUrl <- "http://en.wikipedia.org/wiki/List_of_countries_by_research_and_development_spending"
-wikiRnDPage <- rvest::html(wikiRnDPageUrl)
-wikiRnDTable <-
-  wikiRnDPage %>%
-  html_node("table") %>%
-  html_table
 
 
 
