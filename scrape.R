@@ -1,12 +1,12 @@
 #' webs_scrape/scrape.R
 #' Amanda Dobbyn
-#' Last updated: `r Sys.time()`
+#' Last updated: `r Sys.time()`  
  
 
-#' Inspiration from https://github.com/daattali/UBC-STAT545/blob/master/hw/hw12_web-scraping-api/hw12_web-scraping-api.R
-#' and https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/
+#' Inspiration from https://github.com/daattali/UBC-STAT545/blob/master/hw/hw12_web-scraping-api/hw12_web-scraping-api.R  
+#' and https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
 
-#' Using knitr::spin 
+#' Using knitr::spin   
 
 #+ Set working directory
 setwd(getwd())
@@ -66,11 +66,11 @@ wiki_text <-
   html_text
 
 #' Check out our text
-#+
+#+ eval=FALSE
 head(wiki_text)
 
 #' We actually have a list of paragraphs because we used the "p" tag in html_nodes()
-is.list(wiki_text)
+is.list(wiki_text)  # why does this return `FALSE`?
 length(wiki_text)  # so we have 156 paragraphs
 wiki_text[[3]]
 
@@ -80,7 +80,9 @@ ireland <- NULL
 for (i in 2:(length(wiki_text))) {   # omit first paragraph
   ireland <- paste(ireland, as.character(wiki_text[i]), sep = ' ')
 }
+#+ eval=FALSE
 head(ireland)
+#+
 length(ireland)  # good, our 156 paragraphs are now one vector
 
 #' Get all text to lowercase
@@ -89,10 +91,11 @@ ireland <- tolower(ireland)
 #' Take out all numbers
 ireland <- str_replace_all(ireland,"[0-9]+","")
 
-#' Remove "\n" newlines
+#' Remove `\n` newlines
 # ireland <- gsub("\r?\n|\r", "", ireland)
 ireland <- str_replace_all(ireland, "[\r\n]", "")
 
+#' ***
 
 #' Create a corpus
 i.corp <- Corpus(VectorSource(ireland))
@@ -100,6 +103,7 @@ i.corp <- Corpus(VectorSource(ireland))
 #' Wrap strings into paragraphs so we can see what we have better
 #' Not assigning this to i.corp object, i.e., not i.corp <- str_wrap(i.corp[[1]])
 #' Note: this is the base::strwrap not stringr::str_wrap
+#+ eval=FALSE
 strwrap(i.corp[[1]]) # [[1]] because this corpus contains one document
 
 
@@ -111,6 +115,7 @@ i.corp <- tm_map(i.corp, stripWhitespace)
 i.corp <- tm_map(i.corp, PlainTextDocument)
 
 #' View what we've got
+#+ eval=FALSE
 strwrap(i.corp[[1]])
 
 
@@ -137,6 +142,25 @@ i.sorted <- sort(rowSums(i.matrix), decreasing = TRUE)
 
 #' Ten most frequent words
 i.sorted[1:10]
+
+#' Make into a data.frame
+i.dat <- data.frame(word = names(i.sorted), freq = i.sorted)
+
+#' Remove "the" and "and"
+i.dat.trim <- i.dat %>% 
+  filter(
+    !(word %in% c("the", "and")))
+
+head(i.dat.trim)
+
+#' Set RColorBrewer palate
+pal <- brewer.pal(20,"Dark2")
+#' Set background to black
+par(bg = 'dark green')
+
+#' Make the wordcloud
+wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
+          max.word = 100, color = pal)
 
 
 
