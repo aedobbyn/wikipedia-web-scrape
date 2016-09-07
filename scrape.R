@@ -8,6 +8,7 @@ setwd(getwd())
 #+ Load packages
 library(pacman)
 p_load(knitr,  # for weaving this into pretty format
+       XML,  # for web scraping 
        rvest,  # for web scraping
        tibble,  # for an easier way to work with data.frames
        dplyr,  # for data manipulation
@@ -20,15 +21,24 @@ p_load(knitr,  # for weaving this into pretty format
        ggrepel  # for spreading point labels
 )
 
-wiki_url <-
-wiki_page <- rvest::html(wiki_url)
+wiki_url <- "https://en.wikipedia.org/wiki/Ireland"
+wiki_page <- read_html(wiki_url)
 wiki_table <- 
   wiki_page %>%
-  html_node("talbe") %>%
-  html_table
+  html_nodes("table") %>%
+  html_table(fill = TRUE)
+wiki_table
+length(wiki_table)
 
 
-podcasts <- wiki_table %>% 
+wiki_text <-
+  wiki_page %>% 
+  html_nodes("p") %>% 
+  html_text
+head(wiki_text)
+
+
+ireland <- wiki_table %>% 
   select(-grep("")
            )
 
