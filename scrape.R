@@ -2,6 +2,10 @@
 #' Amanda Dobbyn
 #' Last updated: `r Sys.time()`
  
+
+#' Inspiration from https://github.com/daattali/UBC-STAT545/blob/master/hw/hw12_web-scraping-api/hw12_web-scraping-api.R
+#' and https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/
+
 #' Using knitr::spin 
 
 #+ Set working directory
@@ -14,7 +18,9 @@ p_load(knitr,  # for weaving this into pretty format
        rvest,  # for web scraping
        tibble,  # for an easier way to work with data.frames
        dplyr,  # for data manipulation
+       tm,  # for text mining
        stringr,  # for string manipulation
+       stringi,  # for string manipulation
        lubridate,  # for dates
        tidyr,  # for gather() and spread()
        data.table,  # for 
@@ -61,13 +67,56 @@ wiki_text <-
 #+
 head(wiki_text)
 
-#' Take out [citation_number]
-#+
-txt <- wiki_text %>% 
-  str_replace_all(
-    "[:digit:]", ""
-  )
-head(txt)
+#' We actually have a list of paragraphs because we used the "p" tag in html_nodes()
+is.list(wiki_text)
+length(wiki_text)  # so we have 156 paragraphs
+wiki_text[[3]]
+
+#' Combine our lists to one vector
+#' Note that just doing unlist(wiki_text) doesn't work
+ireland <- NULL
+for (i in 2:(length(wiki_text))) {   # omit first paragraph
+  ireland <- paste(ireland, as.character(wiki_text[i]), sep = ' ')
+}
+head(ireland)
+length(ireland)  # good, our 156 paragraphs are now one vector
+
+#' Get all text to lowercase
+ireland <- tolower(ireland)
+
+#' Create a corpus
+i.corp <- Corpus(VectorSource(ireland))
+
+#' Wrap strings into paragraphs so we can see what we have better
+#' Not assigning this to i.corp object, i.e., not i.corp <- str_wrap(i.corp[[1]])
+#' Note: this is the base::strwrap not stringr::str_wrap
+str_wrap(i.corp[[1]]) # [[1]] because this corpus contains one document
+
+i.corp <- 
+
+
+
+
+
+txt <- paste(readLines(txt[[3]]))
+
+
+
+#' #' Take out [citation_number]
+#' #+
+#' txt <- wiki_text %>% 
+#'   str_replace_all(
+#'     "[:digit:]", ""
+#'   )
+#' head(txt)
+#' 
+#' txt <- wiki_text %>% 
+#'   gsub(
+#'     "[1]", "", .
+#'   )
+#' head(txt)
+
+
 
 # txt <- str_replace_all(txt, "[^a-zA-Z ]","") #only keep letters
 # 
