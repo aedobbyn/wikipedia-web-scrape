@@ -16,6 +16,8 @@ library(pacman)
 p_load(knitr,  # for weaving this into pretty format
        XML,  # for web scraping 
        rvest,  # for web scraping
+       quanteda,  # for term document matrices
+       wordcloud,  # for making wordclouds
        tibble,  # for an easier way to work with data.frames
        dplyr,  # for data manipulation
        tm,  # for text mining
@@ -84,44 +86,69 @@ length(ireland)  # good, our 156 paragraphs are now one vector
 #' Get all text to lowercase
 ireland <- tolower(ireland)
 
+#' Take out all numbers
+ireland <- str_replace_all(ireland,"[0-9]+","")
+
+#' Remove "\n" newlines
+# ireland <- gsub("\r?\n|\r", "", ireland)
+ireland <- str_replace_all(ireland, "[\r\n]", "")
+
+
 #' Create a corpus
 i.corp <- Corpus(VectorSource(ireland))
 
 #' Wrap strings into paragraphs so we can see what we have better
 #' Not assigning this to i.corp object, i.e., not i.corp <- str_wrap(i.corp[[1]])
 #' Note: this is the base::strwrap not stringr::str_wrap
-str_wrap(i.corp[[1]]) # [[1]] because this corpus contains one document
-
-i.corp <- 
+strwrap(i.corp[[1]]) # [[1]] because this corpus contains one document
 
 
+#' Take out punctuation and white space
+i.corp <- tm_map(i.corp, removePunctuation)
+i.corp <- tm_map(i.corp, stripWhitespace)
+
+#' Make corpus a plain text doc
+i.corp <- tm_map(i.corp, PlainTextDocument)
+
+#' View what we've got
+strwrap(i.corp[[1]])
 
 
-
-txt <- paste(readLines(txt[[3]]))
-
+#' ***
 
 
-#' #' Take out [citation_number]
-#' #+
-#' txt <- wiki_text %>% 
-#'   str_replace_all(
-#'     "[:digit:]", ""
-#'   )
-#' head(txt)
-#' 
-#' txt <- wiki_text %>% 
-#'   gsub(
-#'     "[1]", "", .
-#'   )
-#' head(txt)
+#' Make a document feature or document term matrix
+i.dfm <- tm::TermDocumentMatrix(i.corp)
+
+#' Check out rows 1000 to 1010
+inspect(i.dfm[1000:1010, ] )
 
 
 
-# txt <- str_replace_all(txt, "[^a-zA-Z ]","") #only keep letters
-# 
-# 
-# str_replace_all(myText,"[:digit:]","")
+#' Make a wordcloud
+#' First convert dfm to matrix
+i.matrix <- as.matrix(i.dfm)
+
+#' Label the frequency column
+colnames(i.matrix) <- 'frequency'
+
+#' Sort terms by frequency
+i.sorted <- sort(rowSums(i.matrix), decreasing = TRUE)
+
+#' Ten most frequent words
+i.sorted[1:10]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
