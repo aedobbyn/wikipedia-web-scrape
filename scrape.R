@@ -124,8 +124,7 @@ format(em_tab$Population[1], scientific = TRUE)
 #+ eval=FALSE
 em_tab
 
-#' Set variable data types
-# em_tab <- em_tab
+#' Set variable data types  
 
 #' Numerize variables that should be numeric
 to.numerize <- c("Population", "GDP", "GDP_percap")
@@ -145,7 +144,7 @@ em_tab <- em_tab %>%
 em_tab <- em_tab
 em_tab$GDP <- (em_tab$GDP)*(1e+09)
 
-#+ eval=FALSE
+#+ eval=FALSE, echo=FALSE
 em_tab
 
 
@@ -154,8 +153,10 @@ em_tab %>%
   ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
   layer_points()
 
+#' Looks like the ROI is generally wealthier than Northern Ireland  
+#' What about `Area`s within the ROI?
 
-#' For countries in the ROI (Republic of Ireland and also our region of interest, lol), 
+#' For Areas in the ROI (Republic of Ireland and also our region of interest, lol), 
 #' plot GDP vs. per capita GDP and fill by Area
 em_tab %>%
   filter(Country == "ROI") %>%
@@ -193,20 +194,23 @@ wiki_text <-
 #+ eval=FALSE
 head(wiki_text)
 
-#' We actually have a list of paragraphs because we used the `<p>` tag in `html_nodes()`
+#+ eval=FALSE, echo=FALSE
 is.list(wiki_text)  # why does this return `FALSE`?
+
+#' We actually have a list of paragraphs because we used the `<p>` tag in `html_nodes()`
+#+
 length(wiki_text)  # so we have 156 paragraphs
 
-#' The third paragraph
+#' For example, we can get the third paragraph of the page with
 wiki_text[[3]]
 
-#' Combine our lists to one vector 
+#' Combine our lists to one vector  
 #' Note that just doing `unlist(wiki_text)` doesn't work
 ireland <- NULL
 for (i in 2:(length(wiki_text))) {   # omit first paragraph
   ireland <- paste(ireland, as.character(wiki_text[i]), sep = ' ')
 }
-#+ eval=FALSE
+#+ eval=FALSE, echo=FALSE
 head(ireland)
 #+
 length(ireland)  # good, our 156 paragraphs are now one vector

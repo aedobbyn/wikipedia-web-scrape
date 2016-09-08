@@ -1,7 +1,7 @@
 # Wikipedia Ireland Web Scrape
 ### Quick overview  
 * Use `rvest` package to scrape the Wikipedia page on Ireland  
-+ Tame the large of the two tables on the page and create some visualizations  
++ Tame the larger of the two tables on the page and create some visualizations  
 + Munge the text of the entire page and create word frequency wordclouds to see
 what words are mentioned most often on the page  
 This doc was compiled using knitr::spin, 
@@ -53,11 +53,12 @@ wiki_page <- read_html(wiki_url)
 
 ***
 # Adventures in Table Taming  
-There are two tables on the Ireland Wikipedia page
+There are two tables on the Ireland Wikipedia page  
 Scrape both tables  
-A "view page source" and command+F shows that this table is actually 
-`<table class="wikitable sortable">` and the smaller table is just 
-`<table class="wikitable">` but using `html_nodes(".wikitable sortable")`
+In the browser, a "view page source" and command+F shows that the table 
+we want is actually tagged with
+`<table class="wikitable sortable">` and the smaller table is tagged with 
+`<table class="wikitable">`, but using `html_nodes(".wikitable sortable")`
 returns an empy list
 
 
@@ -68,7 +69,7 @@ wiki_table <-
   html_table()
 ```
 
-Check out what we've scraped. Looks like two tables.
+Check out what we've scraped. 
 
 
 ```r
@@ -117,6 +118,9 @@ wiki_table
 ## 13 €216.7 bn
 ```
 
+We've got two tables.
+
+
 ```r
 length(wiki_table) # a list of 2
 ```
@@ -132,7 +136,7 @@ Select the table we want
 emerald_table <- wiki_table[[2]]
 ```
 
-Rename columns with Euro symbols
+Rename columns that contain `€` symbols
 
 
 ```r
@@ -141,48 +145,20 @@ em_tab <- emerald_table %>%
     GDP = `GDP €`,
     GDP_percap = `GDP per person €`
   )
+```
+
+```r
 em_tab
 ```
 
-```
-##                                  Area Population Country       City
-## 1                       Dublin Region      1.3 m     ROI     Dublin
-## 2                   South-West Region    670,000     ROI       Cork
-## 3                     Greater Belfast    720,000      NI    Belfast
-## 4                         West Region    380,000     ROI     Galway
-## 5                     Mid-West Region    340,000     ROI   Limerick
-## 6                   South-East Region    460,000     ROI  Waterford
-## 7                     Mid-East Region    475,000     ROI       Bray
-## 8                       Border Region    430,000     ROI   Drogheda
-## 9            East of Northern Ireland    430,000      NI Ballymeena
-## 10                    Midlands Region    280,000     ROI    Athlone
-## 11 West and South of Northern Ireland    400,000      NI      Newry
-## 12          North of Northern Ireland    280,000      NI      Derry
-## 13                              Total      6.4 m                   
-##          GDP GDP_percap
-## 1   €72.4 bn    €57,200
-## 2   €32.3 bn    €48,500
-## 3   €20.9 bn    €33,550
-## 4   €13.8 bn    €31,500
-## 5   €11.4 bn    €30,300
-## 6   €12.8 bn    €25,600
-## 7   €13.3 bn    €24,700
-## 8   €10.7 bn    €21,100
-## 9    €9.5 bn    €20,300
-## 10   €5.7 bn    €20,100
-## 11   €8.4 bn    €19,300
-## 12   €5.5 bn    €18,400
-## 13 €216.7 bn
-```
-
-Take out last row with totals
+Take out last row that contains totals
 
 
 ```r
 em_tab <- em_tab[1:(nrow(em_tab) - 1), ]
 ```
 
-Check out table structure
+Check out table structure. All varaibles are characters.
 
 
 ```r
@@ -199,14 +175,14 @@ str(em_tab)
 ##  $ GDP_percap: chr  "€57,200" "€48,500" "€33,550" "€31,500" ...
 ```
 
-Make tibble
+Make the table into a `tibble` so we can more easily see variable types
 
 
 ```r
 em_tab <- as_tibble(em_tab)
 ```
 
-Take out Euro symbols in rows and "bn" for billion in GDP column
+Take out `€` symbols in rows and "bn" for billion in GDP column
 
 
 ```r
@@ -215,7 +191,7 @@ em_tab$GDP <- str_replace_all(em_tab$GDP, "bn", "")
 em_tab$GDP_percap <- str_replace_all(em_tab$GDP_percap, "€", "")
 ```
 
-Replace `m` (in Population) with scientific notation
+Replace "m" for million (in the `Population` column) with scientific notation characters
 
 
 ```r
@@ -228,6 +204,9 @@ em_tab$Population
 ##  [1] "1.3e+06" "670,000" "720,000" "380,000" "340,000" "460,000" "475,000"
 ##  [8] "430,000" "430,000" "280,000" "400,000" "280,000"
 ```
+
+Take that element of `Population` into standard notation
+
 
 ```r
 em_tab$Population[1] <- as.numeric(em_tab$Population[1])
@@ -249,7 +228,7 @@ Set variable data types
 # em_tab <- em_tab
 ```
 
-Numerize
+Numerize variables that should be numeric
 
 
 ```r
@@ -259,17 +238,18 @@ em_tab[, to.numerize] <- data.frame(apply
                                     parse_number)) # use readr::parse_numer
 ```
 
-Factorize
+Factorize variables that should be factors
 
 
 ```r
 em_tab <- em_tab %>%
   rsalad::dfFactorize(
-    ignore = c("Population", "GDP", "GDP_percap")
+    ignore = c("Population", "GDP", "GDP_percap")  # in other words, select Area, City, and Country
   )
 ```
 
-Multiply GDP by 1 bil
+Multiply GDP by 1 bil  
+(We took out the trailing "b" earlier)
 
 
 ```r
@@ -277,9 +257,6 @@ em_tab <- em_tab
 em_tab$GDP <- (em_tab$GDP)*(1e+09)
 ```
 
-```r
-em_tab
-```
 
 Graph population and GDP per capita, coloring points by country
 
@@ -290,27 +267,27 @@ em_tab %>%
   layer_points()
 ```
 
-<!--html_preserve--><div id="plot_id971734544-container" class="ggvis-output-container">
-<div id="plot_id971734544" class="ggvis-output"></div>
+<!--html_preserve--><div id="plot_id652475445-container" class="ggvis-output-container">
+<div id="plot_id652475445" class="ggvis-output"></div>
 <div class="plot-gear-icon">
 <nav class="ggvis-control">
 <a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
 <ul class="ggvis-dropdown">
 <li>
 Renderer: 
-<a id="plot_id971734544_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id971734544" data-renderer="svg">SVG</a>
+<a id="plot_id652475445_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id652475445" data-renderer="svg">SVG</a>
  | 
-<a id="plot_id971734544_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id971734544" data-renderer="canvas">Canvas</a>
+<a id="plot_id652475445_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id652475445" data-renderer="canvas">Canvas</a>
 </li>
 <li>
-<a id="plot_id971734544_download" class="ggvis-download" data-plot-id="plot_id971734544">Download</a>
+<a id="plot_id652475445_download" class="ggvis-download" data-plot-id="plot_id652475445">Download</a>
 </li>
 </ul>
 </nav>
 </div>
 </div>
 <script type="text/javascript">
-var plot_id971734544_spec = {
+var plot_id652475445_spec = {
   "data": [
     {
       "name": ".0",
@@ -457,7 +434,7 @@ var plot_id971734544_spec = {
   },
   "handlers": null
 };
-ggvis.getPlot("plot_id971734544").parseSpec(plot_id971734544_spec);
+ggvis.getPlot("plot_id652475445").parseSpec(plot_id652475445_spec);
 </script><!--/html_preserve-->
 
 For countries in the ROI (Republic of Ireland and also our region of interest, lol), 
@@ -473,27 +450,27 @@ em_tab %>%
   layer_points()
 ```
 
-<!--html_preserve--><div id="plot_id107997250-container" class="ggvis-output-container">
-<div id="plot_id107997250" class="ggvis-output"></div>
+<!--html_preserve--><div id="plot_id886004414-container" class="ggvis-output-container">
+<div id="plot_id886004414" class="ggvis-output"></div>
 <div class="plot-gear-icon">
 <nav class="ggvis-control">
 <a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
 <ul class="ggvis-dropdown">
 <li>
 Renderer: 
-<a id="plot_id107997250_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id107997250" data-renderer="svg">SVG</a>
+<a id="plot_id886004414_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id886004414" data-renderer="svg">SVG</a>
  | 
-<a id="plot_id107997250_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id107997250" data-renderer="canvas">Canvas</a>
+<a id="plot_id886004414_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id886004414" data-renderer="canvas">Canvas</a>
 </li>
 <li>
-<a id="plot_id107997250_download" class="ggvis-download" data-plot-id="plot_id107997250">Download</a>
+<a id="plot_id886004414_download" class="ggvis-download" data-plot-id="plot_id886004414">Download</a>
 </li>
 </ul>
 </nav>
 </div>
 </div>
 <script type="text/javascript">
-var plot_id107997250_spec = {
+var plot_id886004414_spec = {
   "data": [
     {
       "name": ".0",
@@ -640,7 +617,7 @@ var plot_id107997250_spec = {
   },
   "handlers": null
 };
-ggvis.getPlot("plot_id107997250").parseSpec(plot_id107997250_spec);
+ggvis.getPlot("plot_id886004414").parseSpec(plot_id886004414_spec);
 </script><!--/html_preserve-->
 
 *** 
@@ -907,11 +884,11 @@ wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
           max.word = 100, color = pal)
 ```
 
-![](scrape_files/figure-html/unnamed-chunk-44-1.png)<!-- -->
+![](scrape_files/figure-html/unnamed-chunk-47-1.png)<!-- -->
 
 
 ---
 title: "scrape.R"
 author: "amanda"
-date: "Thu Sep  8 08:47:21 2016"
+date: "Thu Sep  8 09:03:26 2016"
 ---
