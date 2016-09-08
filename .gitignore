@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-
+.DS_Store
 # for testing out new approaches
-# tinker.R # 
+# tinker.R #
+irish_cloud.png
