@@ -1,17 +1,38 @@
-#' webs_scrape/scrape.R
-#' Amanda Dobbyn
-#' Last updated: `r Sys.time()`  
- 
+#' ---
+#' title: "Wikipedia Ireland Web Scrape"
+#' author: 
+#'  name: "Amanda Dobbyn"
+#'  email: aedobbyn@uchicago.edu
+#' output:
+#'  html_document:
+#'    keep_md: true
+#' ---
 
-#' Inspiration from https://github.com/daattali/UBC-STAT545/blob/master/hw/hw12_web-scraping-api/hw12_web-scraping-api.R  
-#' and https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
+#' ### Quick overview  
+#' * Use `rvest` package to scrape the Wikipedia page on Ireland  
+#' + Tame the larger of the two tables on the page and create some visualizations  
+#' + Munge the text of the entire page and create word frequency wordclouds to see
+#' what words are mentioned most often on the page  
 
-#' Using knitr::spin   
 
-#+ Set working directory
+#' This doc was compiled using knitr::spin, 
+#' thanks to a [post by Dean Attali](http://deanattali.com/2015/03/24/knitrs-best-hidden-gem-spin/)  
+#'   
+#'   
+#'   
+#'   
+#'   
+
+#' ***
+
+#' #### Set things up
+
+#' Set working directory
+#+ set.wd, eval=FALSE, echo=FALSE
 setwd(getwd())
 
-#+ Load packages
+#' Load packages
+#+ package_load
 library(pacman)
 p_load(knitr,  # for weaving this into pretty format
        XML,  # for web scraping 
@@ -21,6 +42,7 @@ p_load(knitr,  # for weaving this into pretty format
        tibble,  # for an easier way to work with data.frames
        dplyr,  # for data manipulation
        tm,  # for text mining
+       readr,  # for parse_number()
        stringr,  # for string manipulation
        stringi,  # for string manipulation
        lubridate,  # for dates
@@ -28,6 +50,7 @@ p_load(knitr,  # for weaving this into pretty format
        data.table,  # for 
        DT,  # for kable()
        ggplot2,  # for plots
+       ggvis,  # for plots
        ggrepel  # for spreading point labels
 )
 
@@ -36,10 +59,16 @@ p_load(knitr,  # for weaving this into pretty format
 wiki_url <- "https://en.wikipedia.org/wiki/Ireland"
 wiki_page <- read_html(wiki_url)
 
-#' Scrape both tables
-#' A "view page source" and command+F shows that this table is actually 
-#' `<table class="wikitable sortable">` and the smaller table is just 
-#' `<table class="wikitable">` but using `html_nodes(".wikitable sortable")`
+#' ***
+
+#' # Adventures in Table Taming  
+
+#' There are two tables on the Ireland Wikipedia page  
+#' Scrape both tables  
+#' In the browser, a "view page source" and command+F shows that the table 
+#' we want is actually tagged with
+#' `<table class="wikitable sortable">` and the smaller table is tagged with 
+#' `<table class="wikitable">`, but using `html_nodes(".wikitable sortable")`
 #' returns an empy list
 #+
 wiki_table <- 
@@ -47,79 +76,89 @@ wiki_table <-
   html_nodes(".wikitable") %>%
   html_table()
 
-#' Check out what we've scraped. Looks like two tables.
+#' Check out what we've scraped. 
 #+
 wiki_table
+
+#' We've got two tables.
+#+
 length(wiki_table) # a list of 2
 
 #' Select the table we want
 #+
-gdp <- wiki_table[[2]]
+emerald_table <- wiki_table[[2]]
 
-#' Rename columns with Euro symbols
-gdp <- gdp %>% 
+#' Rename columns that contain `€` symbols
+em_tab <- emerald_table %>% 
   rename(
     GDP = `GDP €`,
     GDP_percap = `GDP per person €`
   )
-gdp
+#+ eval=FALSE
+em_tab
 
-#' #' Take out last row with totals
-gdp <- gdp[1:(nrow(gdp) - 1), ]
+#' Take out last row that contains totals
+em_tab <- em_tab[1:(nrow(em_tab) - 1), ]
 
-#' Check out table structure
-str(gdp)
+#' Check out table structure. All varaibles are characters.
+str(em_tab)
 
-#' Make tibble
-gdp <- as_tibble(gdp)
+#' Make the table into a `tibble` so we can more easily see variable types
+em_tab <- as_tibble(em_tab)
 
-#' Take out Euro symbols in rows and "bn" for billion in GDP column
-gdp$GDP <- str_replace_all(gdp$GDP, "€", "")
-gdp$GDP <- str_replace_all(gdp$GDP, "bn", "")
-gdp$GDP_percap <- str_replace_all(gdp$GDP_percap, "€", "")
+#' Take out `€` symbols in rows and "bn" for billion in GDP column
+em_tab$GDP <- str_replace_all(em_tab$GDP, "€", "")
+em_tab$GDP <- str_replace_all(em_tab$GDP, "bn", "")
+em_tab$GDP_percap <- str_replace_all(em_tab$GDP_percap, "€", "")
 
 
-gdp2 <- gdp
-#' Replace "m" (in Population) with scientific notation
-gdp2$Population <- gdp$Population %>% 
+#' Replace "m" for million (in the `Population` column) with scientific notation characters
+em_tab$Population <- em_tab$Population %>% 
   gsub(" m", "e+06", .) 
-gdp2$Population
+em_tab$Population
 
-gdp2$Population[1] <- as.numeric(gdp2$Population[1])
-format(gdp2$Population[1], scientific = TRUE)
+#' Take that element of `Population` into standard notation
+em_tab$Population[1] <- as.numeric(em_tab$Population[1])
+format(em_tab$Population[1], scientific = TRUE)
+
+#+ eval=FALSE
+em_tab
+
+#' Set variable data types  
+
+#' Numerize variables that should be numeric
+to.numerize <- c("Population", "GDP", "GDP_percap")
+em_tab[, to.numerize] <- data.frame(apply
+                                    (em_tab[, to.numerize], 2, 
+                                    parse_number)) # use readr::parse_numer
+
+#' Factorize variables that should be factors
+em_tab <- em_tab %>%
+  rsalad::dfFactorize(
+    ignore = c("Population", "GDP", "GDP_percap")  # in other words, select Area, City, and Country
+  )
 
 
-gdp2
+#' Multiply GDP by 1 bil  
+#' (We took out the trailing "b" earlier)
+em_tab <- em_tab
+em_tab$GDP <- (em_tab$GDP)*(1e+09)
 
-#' Set variable data types
-gdp3 <- gdp2
-
-gdp3$Area <- factor(gdp$Area)
-gdp3$GDP_percap <- parse_number(gdp$GDP_percap)
-gdp3$GDP <- parse_number(gdp$GDP)
-gdp3$Population <- parse_number(gdp2$Population)
-gdp3$City <- factor(gdp$City)
-gdp3$Country <- factor(gdp$Country)
-
-str(gdp3)
-
-gdp3
-
-# Multiply GDP by 1 bil
-gdp4 <- gdp3
-gdp4$GDP <- (gdp3$GDP)*(1e+09)
-gdp4
+#+ eval=FALSE, echo=FALSE
+em_tab
 
 
 #' Graph population and GDP per capita, coloring points by country
-gdp4 %>% 
+em_tab %>% 
   ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
   layer_points()
 
+#' Looks like the ROI is generally wealthier than Northern Ireland  
+#' What about `Area`s within the ROI?
 
-#' For countries in the ROI [also our region of interest, lol], 
+#' For Areas in the ROI (Republic of Ireland and also our region of interest, lol), 
 #' plot GDP vs. per capita GDP and fill by Area
-gdp4 %>%
+em_tab %>%
   filter(Country == "ROI") %>%
   droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
   ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
@@ -130,51 +169,48 @@ gdp4 %>%
 
 
 
-#' ## Thoughts on better ways to replace the "1.3 m" population
-# gdp2$population <- if("e" %in% gdp2$population) {as.numeric(gdp2$population)}
-
-# repl.m <- function(pop) {
-#   for (r in pop) {
-#     if (contains("m")) {
-#       str_replace(., "m", "000000")
-#     } else {
-#       next
-#     }
-#   }
-# }
-# gdp2$population <- repl.m(gdp$Population)
 
 
 
 
 
 
+
+#' *** 
+
+#' # Adventures in Text Munging and Wordclouding  
 
 #' ***
-  
+
+
 #' Scrape all text (excluding citations) from the Wikipedia page
 #+
 wiki_text <-
   wiki_page %>% 
-  html_nodes("p") %>% 
+  html_nodes("p") %>%  # if use the selector #bodyContent, citations get included as text which we don't want
   html_text
 
 #' Check out our text
 #+ eval=FALSE
 head(wiki_text)
 
-#' We actually have a list of paragraphs because we used the "p" tag in html_nodes()
+#+ eval=FALSE, echo=FALSE
 is.list(wiki_text)  # why does this return `FALSE`?
+
+#' We actually have a list of paragraphs because we used the `<p>` tag in `html_nodes()`
+#+
 length(wiki_text)  # so we have 156 paragraphs
+
+#' For example, we can get the third paragraph of the page with
 wiki_text[[3]]
 
-#' Combine our lists to one vector
-#' Note that just doing unlist(wiki_text) doesn't work
+#' Combine our lists to one vector  
+#' Note that just doing `unlist(wiki_text)` doesn't work
 ireland <- NULL
 for (i in 2:(length(wiki_text))) {   # omit first paragraph
   ireland <- paste(ireland, as.character(wiki_text[i]), sep = ' ')
 }
-#+ eval=FALSE
+#+ eval=FALSE, echo=FALSE
 head(ireland)
 #+
 length(ireland)  # good, our 156 paragraphs are now one vector
@@ -191,11 +227,14 @@ ireland <- str_replace_all(ireland, "[\r\n]", "")
 
 #' ***
 
+#' Much of the wordclouding inspiration was adapted from 
+#' https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
+
 #' Create a corpus
 i.corp <- Corpus(VectorSource(ireland))
 
-#' Wrap strings into paragraphs so we can see what we have better
-#' Not assigning this to i.corp object, i.e., not i.corp <- str_wrap(i.corp[[1]])
+#' Wrap strings into paragraphs so we can see what we have better  
+#' Not assigning this to i.corp object, i.e., not i.corp <- str_wrap(i.corp[[1]])  
 #' Note: this is the base::strwrap not stringr::str_wrap
 #+ eval=FALSE
 strwrap(i.corp[[1]]) # [[1]] because this corpus contains one document
@@ -224,7 +263,7 @@ inspect(i.dfm[1000:1010, ] )
 
 
 
-#' Make a wordcloud
+#' Make a wordcloud  
 #' First convert dfm to matrix
 i.matrix <- as.matrix(i.dfm)
 
