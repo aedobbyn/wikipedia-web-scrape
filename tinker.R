@@ -1,3 +1,13 @@
+## TODO
+#---------
+# update gitignore to ignore this file
+# add #+ around chunks
+# make sure that graphs are visible in .md doc on github
+# put tables in kable()
+
+
+
+
 #' Thoughts on better ways to replace the "1.3 m" population
 # gdp2$population <- if("e" %in% gdp2$population) {as.numeric(gdp2$population)}
 
