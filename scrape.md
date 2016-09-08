@@ -1,9 +1,8 @@
-# Ireland Web Scrape
-
-Last updated: 2016-09-07 17:37:13  
+# Wikipedia Ireland Web Scrape
+Last updated: 2016-09-07 18:12:20  
 Inspiration from https://github.com/daattali/UBC-STAT545/blob/master/hw/hw12_web-scraping-api/hw12_web-scraping-api.R  
 and https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
-Using knitr::spin   
+This doc compiled using knitr::spin   
 
 
 ```r
@@ -41,7 +40,8 @@ wiki_url <- "https://en.wikipedia.org/wiki/Ireland"
 wiki_page <- read_html(wiki_url)
 ```
 
-Scrape both tables
+# Adventures in table scraping  
+Scrape both tables  
 A "view page source" and command+F shows that this table is actually 
 `<table class="wikitable sortable">` and the smaller table is just 
 `<table class="wikitable">` but using `html_nodes(".wikitable sortable")`
@@ -202,10 +202,11 @@ gdp$GDP <- str_replace_all(gdp$GDP, "bn", "")
 gdp$GDP_percap <- str_replace_all(gdp$GDP_percap, "€", "")
 
 
+# Copy our dataframe
 gdp2 <- gdp
 ```
 
-Replace "m" (in Population) with scientific notation
+Replace `m` (in Population) with scientific notation
 
 
 ```r
@@ -230,25 +231,6 @@ format(gdp2$Population[1], scientific = TRUE)
 
 ```r
 gdp2
-```
-
-```
-## # A tibble: 12 × 6
-##                                  Area Population Country       City   GDP
-## *                               <chr>      <chr>   <chr>      <chr> <chr>
-## 1                       Dublin Region    1300000     ROI     Dublin 72.4 
-## 2                   South-West Region    670,000     ROI       Cork 32.3 
-## 3                     Greater Belfast    720,000      NI    Belfast 20.9 
-## 4                         West Region    380,000     ROI     Galway 13.8 
-## 5                     Mid-West Region    340,000     ROI   Limerick 11.4 
-## 6                   South-East Region    460,000     ROI  Waterford 12.8 
-## 7                     Mid-East Region    475,000     ROI       Bray 13.3 
-## 8                       Border Region    430,000     ROI   Drogheda 10.7 
-## 9            East of Northern Ireland    430,000      NI Ballymeena  9.5 
-## 10                    Midlands Region    280,000     ROI    Athlone  5.7 
-## 11 West and South of Northern Ireland    400,000      NI      Newry  8.4 
-## 12          North of Northern Ireland    280,000      NI      Derry  5.5 
-## # ... with 1 more variables: GDP_percap <chr>
 ```
 
 Set variable data types
@@ -304,26 +286,10 @@ gdp3
 # Multiply GDP by 1 bil
 gdp4 <- gdp3
 gdp4$GDP <- (gdp3$GDP)*(1e+09)
-gdp4
 ```
 
-```
-## # A tibble: 12 × 6
-##                                  Area Population Country       City
-## *                              <fctr>      <dbl>  <fctr>     <fctr>
-## 1                       Dublin Region    1300000     ROI     Dublin
-## 2                   South-West Region     670000     ROI       Cork
-## 3                     Greater Belfast     720000      NI    Belfast
-## 4                         West Region     380000     ROI     Galway
-## 5                     Mid-West Region     340000     ROI   Limerick
-## 6                   South-East Region     460000     ROI  Waterford
-## 7                     Mid-East Region     475000     ROI       Bray
-## 8                       Border Region     430000     ROI   Drogheda
-## 9            East of Northern Ireland     430000      NI Ballymeena
-## 10                    Midlands Region     280000     ROI    Athlone
-## 11 West and South of Northern Ireland     400000      NI      Newry
-## 12          North of Northern Ireland     280000      NI      Derry
-## # ... with 2 more variables: GDP <dbl>, GDP_percap <dbl>
+```r
+gdp4
 ```
 
 Graph population and GDP per capita, coloring points by country
@@ -335,27 +301,27 @@ gdp4 %>%
   layer_points()
 ```
 
-<!--html_preserve--><div id="plot_id764612136-container" class="ggvis-output-container">
-<div id="plot_id764612136" class="ggvis-output"></div>
+<!--html_preserve--><div id="plot_id649788316-container" class="ggvis-output-container">
+<div id="plot_id649788316" class="ggvis-output"></div>
 <div class="plot-gear-icon">
 <nav class="ggvis-control">
 <a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
 <ul class="ggvis-dropdown">
 <li>
 Renderer: 
-<a id="plot_id764612136_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id764612136" data-renderer="svg">SVG</a>
+<a id="plot_id649788316_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id649788316" data-renderer="svg">SVG</a>
  | 
-<a id="plot_id764612136_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id764612136" data-renderer="canvas">Canvas</a>
+<a id="plot_id649788316_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id649788316" data-renderer="canvas">Canvas</a>
 </li>
 <li>
-<a id="plot_id764612136_download" class="ggvis-download" data-plot-id="plot_id764612136">Download</a>
+<a id="plot_id649788316_download" class="ggvis-download" data-plot-id="plot_id649788316">Download</a>
 </li>
 </ul>
 </nav>
 </div>
 </div>
 <script type="text/javascript">
-var plot_id764612136_spec = {
+var plot_id649788316_spec = {
   "data": [
     {
       "name": ".0",
@@ -502,10 +468,10 @@ var plot_id764612136_spec = {
   },
   "handlers": null
 };
-ggvis.getPlot("plot_id764612136").parseSpec(plot_id764612136_spec);
+ggvis.getPlot("plot_id649788316").parseSpec(plot_id649788316_spec);
 </script><!--/html_preserve-->
 
-For countries in the ROI [also our region of interest, lol], 
+For countries in the ROI (Republic of Ireland and also our region of interest, lol), 
 plot GDP vs. per capita GDP and fill by Area
 
 
@@ -518,27 +484,27 @@ gdp4 %>%
   layer_points()
 ```
 
-<!--html_preserve--><div id="plot_id825004865-container" class="ggvis-output-container">
-<div id="plot_id825004865" class="ggvis-output"></div>
+<!--html_preserve--><div id="plot_id263034986-container" class="ggvis-output-container">
+<div id="plot_id263034986" class="ggvis-output"></div>
 <div class="plot-gear-icon">
 <nav class="ggvis-control">
 <a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
 <ul class="ggvis-dropdown">
 <li>
 Renderer: 
-<a id="plot_id825004865_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id825004865" data-renderer="svg">SVG</a>
+<a id="plot_id263034986_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id263034986" data-renderer="svg">SVG</a>
  | 
-<a id="plot_id825004865_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id825004865" data-renderer="canvas">Canvas</a>
+<a id="plot_id263034986_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id263034986" data-renderer="canvas">Canvas</a>
 </li>
 <li>
-<a id="plot_id825004865_download" class="ggvis-download" data-plot-id="plot_id825004865">Download</a>
+<a id="plot_id263034986_download" class="ggvis-download" data-plot-id="plot_id263034986">Download</a>
 </li>
 </ul>
 </nav>
 </div>
 </div>
 <script type="text/javascript">
-var plot_id825004865_spec = {
+var plot_id263034986_spec = {
   "data": [
     {
       "name": ".0",
@@ -685,7 +651,7 @@ var plot_id825004865_spec = {
   },
   "handlers": null
 };
-ggvis.getPlot("plot_id825004865").parseSpec(plot_id825004865_spec);
+ggvis.getPlot("plot_id263034986").parseSpec(plot_id263034986_spec);
 </script><!--/html_preserve-->
 
 Thoughts on better ways to replace the "1.3 m" population
@@ -706,15 +672,18 @@ Thoughts on better ways to replace the "1.3 m" population
 # gdp2$population <- repl.m(gdp$Population)
 ```
 
+
 *** 
-.
-.
-.
-# Adventures in text munging
-.
-.
-.
+.  
+.  
+.  
+# Adventures in text munging and wordclouding  
+.  
+.  
+.  
+
 ***
+
 Scrape all text (excluding citations) from the Wikipedia page
 
 
@@ -815,8 +784,8 @@ Create a corpus
 i.corp <- Corpus(VectorSource(ireland))
 ```
 
-Wrap strings into paragraphs so we can see what we have better
-Not assigning this to i.corp object, i.e., not i.corp <- str_wrap(i.corp[[1]])
+Wrap strings into paragraphs so we can see what we have better  
+Not assigning this to i.corp object, i.e., not i.corp <- str_wrap(i.corp[[1]])  
 Note: this is the base::strwrap not stringr::str_wrap
 
 
@@ -883,7 +852,7 @@ inspect(i.dfm[1000:1010, ] )
 ##   extent               1
 ```
 
-Make a wordcloud
+Make a wordcloud  
 First convert dfm to matrix
 
 
@@ -974,11 +943,11 @@ wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
           max.word = 100, color = pal)
 ```
 
-![](scrape_files/figure-html/unnamed-chunk-40-1.png)<!-- -->
+![](scrape_files/figure-html/unnamed-chunk-42-1.png)<!-- -->
 
 
 ---
 title: "scrape.R"
 author: "amanda"
-date: "Wed Sep  7 17:37:13 2016"
+date: "Wed Sep  7 18:12:20 2016"
 ---

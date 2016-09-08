@@ -1,5 +1,5 @@
 #' ---
-#' title: "Ireland Web Scrape"
+#' title: "Wikipedia Ireland Web Scrape"
 #' author: 
 #'  name: "Amanda Dobbyn"
 #'  email: aedobbyn@uchicago.edu
@@ -16,7 +16,8 @@
 
 #' This doc compiled using knitr::spin   
 
-#+ Set working directory
+
+#+ set.wd, eval=FALSE
 setwd(getwd())
 
 #+ Load packages
@@ -46,7 +47,9 @@ p_load(knitr,  # for weaving this into pretty format
 wiki_url <- "https://en.wikipedia.org/wiki/Ireland"
 wiki_page <- read_html(wiki_url)
 
-#' Scrape both tables
+#' # Adventures in table scraping  
+
+#' Scrape both tables  
 #' A "view page source" and command+F shows that this table is actually 
 #' `<table class="wikitable sortable">` and the smaller table is just 
 #' `<table class="wikitable">` but using `html_nodes(".wikitable sortable")`
@@ -101,6 +104,7 @@ gdp2$Population[1] <- as.numeric(gdp2$Population[1])
 format(gdp2$Population[1], scientific = TRUE)
 
 
+#+ eval=FALSE
 gdp2
 
 #' Set variable data types
@@ -120,6 +124,8 @@ gdp3
 # Multiply GDP by 1 bil
 gdp4 <- gdp3
 gdp4$GDP <- (gdp3$GDP)*(1e+09)
+
+#+ eval=FALSE
 gdp4
 
 
@@ -129,7 +135,7 @@ gdp4 %>%
   layer_points()
 
 
-#' For countries in the ROI [also our region of interest, lol], 
+#' For countries in the ROI (Republic of Ireland and also our region of interest, lol), 
 #' plot GDP vs. per capita GDP and fill by Area
 gdp4 %>%
   filter(Country == "ROI") %>%
@@ -160,18 +166,18 @@ gdp4 %>%
 # gdp2$population <- repl.m(gdp$Population)
 
 
-
+#'
 #' *** 
-#' .
-#' .
-#' .
-#' # Adventures in text munging
-#' .
-#' .
-#' .
-
+#' .  
+#' .  
+#' .  
+#' # Adventures in text munging and wordclouding  
+#' .  
+#' .  
+#' .  
+#'
 #' ***
-  
+#'
 #' Scrape all text (excluding citations) from the Wikipedia page
 #+
 wiki_text <-
@@ -216,8 +222,8 @@ ireland <- str_replace_all(ireland, "[\r\n]", "")
 #' Create a corpus
 i.corp <- Corpus(VectorSource(ireland))
 
-#' Wrap strings into paragraphs so we can see what we have better
-#' Not assigning this to i.corp object, i.e., not i.corp <- str_wrap(i.corp[[1]])
+#' Wrap strings into paragraphs so we can see what we have better  
+#' Not assigning this to i.corp object, i.e., not i.corp <- str_wrap(i.corp[[1]])  
 #' Note: this is the base::strwrap not stringr::str_wrap
 #+ eval=FALSE
 strwrap(i.corp[[1]]) # [[1]] because this corpus contains one document
@@ -246,7 +252,7 @@ inspect(i.dfm[1000:1010, ] )
 
 
 
-#' Make a wordcloud
+#' Make a wordcloud  
 #' First convert dfm to matrix
 i.matrix <- as.matrix(i.dfm)
 
