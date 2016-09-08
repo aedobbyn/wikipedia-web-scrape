@@ -67,77 +67,81 @@ length(wiki_table) # a list of 2
 
 #' Select the table we want
 #+
-gdp <- wiki_table[[2]]
+emerald_table <- wiki_table[[2]]
 
 #' Rename columns with Euro symbols
-gdp <- gdp %>% 
+em_tab <- emerald_table %>% 
   rename(
     GDP = `GDP €`,
     GDP_percap = `GDP per person €`
   )
-gdp
+em_tab
 
 #' Take out last row with totals
-gdp <- gdp[1:(nrow(gdp) - 1), ]
+em_tab <- em_tab[1:(nrow(em_tab) - 1), ]
 
 #' Check out table structure
-str(gdp)
+str(em_tab)
 
 #' Make tibble
-gdp <- as_tibble(gdp)
+em_tab <- as_tibble(em_tab)
 
 #' Take out Euro symbols in rows and "bn" for billion in GDP column
-gdp$GDP <- str_replace_all(gdp$GDP, "€", "")
-gdp$GDP <- str_replace_all(gdp$GDP, "bn", "")
-gdp$GDP_percap <- str_replace_all(gdp$GDP_percap, "€", "")
+em_tab$GDP <- str_replace_all(em_tab$GDP, "€", "")
+em_tab$GDP <- str_replace_all(gdem_tabp$GDP, "bn", "")
+em_tab$GDP_percap <- str_replace_all(em_tab$GDP_percap, "€", "")
 
 
 # Copy our dataframe
-gdp2 <- gdp
+em_tab <- em_tab
 
 #' Replace `m` (in Population) with scientific notation
-gdp2$Population <- gdp$Population %>% 
+em_tab$Population <- gdp$Population %>% 
   gsub(" m", "e+06", .) 
-gdp2$Population
+em_tab$Population
 
-gdp2$Population[1] <- as.numeric(gdp2$Population[1])
-format(gdp2$Population[1], scientific = TRUE)
+em_tab$Population[1] <- as.numeric(em_tab$Population[1])
+format(em_tab$Population[1], scientific = TRUE)
 
 
 #+ eval=FALSE
-gdp2
+em_tab
 
 #' Set variable data types
-gdp3 <- gdp2
+# em_tab <- em_tab
 
-gdp3$Area <- factor(gdp$Area)
-gdp3$GDP_percap <- parse_number(gdp$GDP_percap)
-gdp3$GDP <- parse_number(gdp$GDP)
-gdp3$Population <- parse_number(gdp2$Population)
-gdp3$City <- factor(gdp$City)
-gdp3$Country <- factor(gdp$Country)
+#' Numerize
+to.numerize <- c("Population", "GDP", "GDP_percap")
+em_tab[, to.numerize] <- data.frame(apply
+                                    (em_tab[, to.numerize], 2, 
+                                    parse_number)) # use readr::parse_numer
 
-str(gdp3)
+#' Factorize
+em_tab <- em_tab %>%
+  rsalad::dfFactorize(
+    ignore = c("Population", "GDP", "GDP_percap")
+  )
 
-gdp3
+em_tab
+
 
 # Multiply GDP by 1 bil
-gdp4 <- gdp3
-gdp4$GDP <- (gdp3$GDP)*(1e+09)
+em_tab <- em_tab
+em_tab$GDP <- (em_tab$GDP)*(1e+09)
 
 #+ eval=FALSE
-gdp4
+em_tab
 
 
 #' Graph population and GDP per capita, coloring points by country
-gdp4 %>% 
+em_tab %>% 
   ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
   layer_points()
 
 
 #' For countries in the ROI (Republic of Ireland and also our region of interest, lol), 
 #' plot GDP vs. per capita GDP and fill by Area
-gdp4 %>%
+em_tab %>%
   filter(Country == "ROI") %>%
   droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
   ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
