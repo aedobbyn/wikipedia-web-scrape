@@ -14,7 +14,6 @@
 
 
 
-# How we have it
 # Write function that bundles/generalizes this
 
 

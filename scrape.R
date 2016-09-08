@@ -8,19 +8,31 @@
 #'    keep_md: true
 #' ---
 
-
-#' Last updated: `r Sys.time()`  
-
-#' Inspiration from https://github.com/daattali/UBC-STAT545/blob/master/hw/hw12_web-scraping-api/hw12_web-scraping-api.R  
-#' and https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
-
-#' This doc compiled using knitr::spin   
+#' ### Quick overview  
+#' * Use `rvest` package to scrape the Wikipedia page on Ireland  
+#' + Tame the larger of the two tables on the page and create some visualizations  
+#' + Munge the text of the entire page and create word frequency wordclouds to see
+#' what words are mentioned most often on the page  
 
 
-#+ set.wd, eval=FALSE
+#' This doc was compiled using knitr::spin, 
+#' thanks to a [post by Dean Attali](http://deanattali.com/2015/03/24/knitrs-best-hidden-gem-spin/)  
+#'   
+#'   
+#'   
+#'   
+#'   
+
+#' ***
+
+#' #### Set things up
+
+#' Set working directory
+#+ set.wd, eval=FALSE, echo=FALSE
 setwd(getwd())
 
-#+ Load packages
+#' Load packages
+#+ package_load
 library(pacman)
 p_load(knitr,  # for weaving this into pretty format
        XML,  # for web scraping 
@@ -47,12 +59,16 @@ p_load(knitr,  # for weaving this into pretty format
 wiki_url <- "https://en.wikipedia.org/wiki/Ireland"
 wiki_page <- read_html(wiki_url)
 
-#' # Adventures in table scraping  
+#' ***
 
+#' # Adventures in Table Taming  
+
+#' There are two tables on the Ireland Wikipedia page  
 #' Scrape both tables  
-#' A "view page source" and command+F shows that this table is actually 
-#' `<table class="wikitable sortable">` and the smaller table is just 
-#' `<table class="wikitable">` but using `html_nodes(".wikitable sortable")`
+#' In the browser, a "view page source" and command+F shows that the table 
+#' we want is actually tagged with
+#' `<table class="wikitable sortable">` and the smaller table is tagged with 
+#' `<table class="wikitable">`, but using `html_nodes(".wikitable sortable")`
 #' returns an empy list
 #+
 wiki_table <- 
@@ -60,49 +76,50 @@ wiki_table <-
   html_nodes(".wikitable") %>%
   html_table()
 
-#' Check out what we've scraped. Looks like two tables.
+#' Check out what we've scraped. 
 #+
 wiki_table
+
+#' We've got two tables.
+#+
 length(wiki_table) # a list of 2
 
 #' Select the table we want
 #+
 emerald_table <- wiki_table[[2]]
 
-#' Rename columns with Euro symbols
+#' Rename columns that contain `€` symbols
 em_tab <- emerald_table %>% 
   rename(
     GDP = `GDP €`,
     GDP_percap = `GDP per person €`
   )
+#+ eval=FALSE
 em_tab
 
-#' Take out last row with totals
+#' Take out last row that contains totals
 em_tab <- em_tab[1:(nrow(em_tab) - 1), ]
 
-#' Check out table structure
+#' Check out table structure. All varaibles are characters.
 str(em_tab)
 
-#' Make tibble
+#' Make the table into a `tibble` so we can more easily see variable types
 em_tab <- as_tibble(em_tab)
 
-#' Take out Euro symbols in rows and "bn" for billion in GDP column
+#' Take out `€` symbols in rows and "bn" for billion in GDP column
 em_tab$GDP <- str_replace_all(em_tab$GDP, "€", "")
-em_tab$GDP <- str_replace_all(gdem_tabp$GDP, "bn", "")
+em_tab$GDP <- str_replace_all(em_tab$GDP, "bn", "")
 em_tab$GDP_percap <- str_replace_all(em_tab$GDP_percap, "€", "")
 
 
-# Copy our dataframe
-em_tab <- em_tab
-
-#' Replace `m` (in Population) with scientific notation
-em_tab$Population <- gdp$Population %>% 
+#' Replace "m" for million (in the `Population` column) with scientific notation characters
+em_tab$Population <- em_tab$Population %>% 
   gsub(" m", "e+06", .) 
 em_tab$Population
 
+#' Take that element of `Population` into standard notation
 em_tab$Population[1] <- as.numeric(em_tab$Population[1])
 format(em_tab$Population[1], scientific = TRUE)
-
 
 #+ eval=FALSE
 em_tab
@@ -110,22 +127,21 @@ em_tab
 #' Set variable data types
 # em_tab <- em_tab
 
-#' Numerize
+#' Numerize variables that should be numeric
 to.numerize <- c("Population", "GDP", "GDP_percap")
 em_tab[, to.numerize] <- data.frame(apply
                                     (em_tab[, to.numerize], 2, 
                                     parse_number)) # use readr::parse_numer
 
-#' Factorize
+#' Factorize variables that should be factors
 em_tab <- em_tab %>%
   rsalad::dfFactorize(
-    ignore = c("Population", "GDP", "GDP_percap")
+    ignore = c("Population", "GDP", "GDP_percap")  # in other words, select Area, City, and Country
   )
 
-em_tab
 
-
-# Multiply GDP by 1 bil
+#' Multiply GDP by 1 bil  
+#' (We took out the trailing "b" earlier)
 em_tab <- em_tab
 em_tab$GDP <- (em_tab$GDP)*(1e+09)
 
@@ -158,23 +174,19 @@ em_tab %>%
 
 
 
-#'
+
 #' *** 
-#' .  
-#' .  
-#' .  
-#' # Adventures in text munging and wordclouding  
-#' .  
-#' .  
-#' .  
-#'
+
+#' # Adventures in Text Munging and Wordclouding  
+
 #' ***
-#'
+
+
 #' Scrape all text (excluding citations) from the Wikipedia page
 #+
 wiki_text <-
   wiki_page %>% 
-  html_nodes("p") %>% 
+  html_nodes("p") %>%  # if use the selector #bodyContent, citations get included as text which we don't want
   html_text
 
 #' Check out our text
@@ -210,6 +222,9 @@ ireland <- str_replace_all(ireland,"[0-9]+","")
 ireland <- str_replace_all(ireland, "[\r\n]", "")
 
 #' ***
+
+#' Much of the wordclouding inspiration was adapted from 
+#' https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
 
 #' Create a corpus
 i.corp <- Corpus(VectorSource(ireland))

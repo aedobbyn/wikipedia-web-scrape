@@ -1,13 +1,24 @@
 # Wikipedia Ireland Web Scrape
-Last updated: 2016-09-07 18:12:20  
-Inspiration from https://github.com/daattali/UBC-STAT545/blob/master/hw/hw12_web-scraping-api/hw12_web-scraping-api.R  
-and https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
-This doc compiled using knitr::spin   
+### Quick overview  
+* Use `rvest` package to scrape the Wikipedia page on Ireland  
++ Tame the large of the two tables on the page and create some visualizations  
++ Munge the text of the entire page and create word frequency wordclouds to see
+what words are mentioned most often on the page  
+This doc was compiled using knitr::spin, 
+thanks to a [post by Dean Attali](http://deanattali.com/2015/03/24/knitrs-best-hidden-gem-spin/)  
+  
+  
+  
+  
+  
+***
+#### Set things up
+Set working directory
 
 
-```r
-setwd(getwd())
-```
+
+Load packages
+
 
 ```r
 library(pacman)
@@ -40,7 +51,9 @@ wiki_url <- "https://en.wikipedia.org/wiki/Ireland"
 wiki_page <- read_html(wiki_url)
 ```
 
-# Adventures in table scraping  
+***
+# Adventures in Table Taming  
+There are two tables on the Ireland Wikipedia page
 Scrape both tables  
 A "view page source" and command+F shows that this table is actually 
 `<table class="wikitable sortable">` and the smaller table is just 
@@ -116,19 +129,19 @@ Select the table we want
 
 
 ```r
-gdp <- wiki_table[[2]]
+emerald_table <- wiki_table[[2]]
 ```
 
 Rename columns with Euro symbols
 
 
 ```r
-gdp <- gdp %>% 
+em_tab <- emerald_table %>% 
   rename(
     GDP = `GDP €`,
     GDP_percap = `GDP per person €`
   )
-gdp
+em_tab
 ```
 
 ```
@@ -166,14 +179,14 @@ Take out last row with totals
 
 
 ```r
-gdp <- gdp[1:(nrow(gdp) - 1), ]
+em_tab <- em_tab[1:(nrow(em_tab) - 1), ]
 ```
 
 Check out table structure
 
 
 ```r
-str(gdp)
+str(em_tab)
 ```
 
 ```
@@ -190,29 +203,25 @@ Make tibble
 
 
 ```r
-gdp <- as_tibble(gdp)
+em_tab <- as_tibble(em_tab)
 ```
 
 Take out Euro symbols in rows and "bn" for billion in GDP column
 
 
 ```r
-gdp$GDP <- str_replace_all(gdp$GDP, "€", "")
-gdp$GDP <- str_replace_all(gdp$GDP, "bn", "")
-gdp$GDP_percap <- str_replace_all(gdp$GDP_percap, "€", "")
-
-
-# Copy our dataframe
-gdp2 <- gdp
+em_tab$GDP <- str_replace_all(em_tab$GDP, "€", "")
+em_tab$GDP <- str_replace_all(em_tab$GDP, "bn", "")
+em_tab$GDP_percap <- str_replace_all(em_tab$GDP_percap, "€", "")
 ```
 
 Replace `m` (in Population) with scientific notation
 
 
 ```r
-gdp2$Population <- gdp$Population %>% 
+em_tab$Population <- em_tab$Population %>% 
   gsub(" m", "e+06", .) 
-gdp2$Population
+em_tab$Population
 ```
 
 ```
@@ -221,8 +230,8 @@ gdp2$Population
 ```
 
 ```r
-gdp2$Population[1] <- as.numeric(gdp2$Population[1])
-format(gdp2$Population[1], scientific = TRUE)
+em_tab$Population[1] <- as.numeric(em_tab$Population[1])
+format(em_tab$Population[1], scientific = TRUE)
 ```
 
 ```
@@ -230,98 +239,78 @@ format(gdp2$Population[1], scientific = TRUE)
 ```
 
 ```r
-gdp2
+em_tab
 ```
 
 Set variable data types
 
 
 ```r
-gdp3 <- gdp2
-
-gdp3$Area <- factor(gdp$Area)
-gdp3$GDP_percap <- parse_number(gdp$GDP_percap)
-gdp3$GDP <- parse_number(gdp$GDP)
-gdp3$Population <- parse_number(gdp2$Population)
-gdp3$City <- factor(gdp$City)
-gdp3$Country <- factor(gdp$Country)
-
-str(gdp3)
+# em_tab <- em_tab
 ```
 
+Numerize
+
+
+```r
+to.numerize <- c("Population", "GDP", "GDP_percap")
+em_tab[, to.numerize] <- data.frame(apply
+                                    (em_tab[, to.numerize], 2, 
+                                    parse_number)) # use readr::parse_numer
 ```
-## Classes 'tbl_df', 'tbl' and 'data.frame':	12 obs. of  6 variables:
-##  $ Area      : Factor w/ 12 levels "Border Region",..: 2 10 4 12 6 9 5 1 3 7 ...
-##  $ Population: num  1300000 670000 720000 380000 340000 460000 475000 430000 430000 280000 ...
-##  $ Country   : Factor w/ 2 levels "NI","ROI": 2 2 1 2 2 2 2 2 1 2 ...
-##  $ City      : Factor w/ 12 levels "Athlone","Ballymeena",..: 8 5 3 9 10 12 4 7 2 1 ...
-##  $ GDP       : num  72.4 32.3 20.9 13.8 11.4 12.8 13.3 10.7 9.5 5.7 ...
-##  $ GDP_percap: num  57200 48500 33550 31500 30300 ...
+
+Factorize
+
+
+```r
+em_tab <- em_tab %>%
+  rsalad::dfFactorize(
+    ignore = c("Population", "GDP", "GDP_percap")
+  )
+```
+
+Multiply GDP by 1 bil
+
+
+```r
+em_tab <- em_tab
+em_tab$GDP <- (em_tab$GDP)*(1e+09)
 ```
 
 ```r
-gdp3
-```
-
-```
-## # A tibble: 12 × 6
-##                                  Area Population Country       City   GDP
-## *                              <fctr>      <dbl>  <fctr>     <fctr> <dbl>
-## 1                       Dublin Region    1300000     ROI     Dublin  72.4
-## 2                   South-West Region     670000     ROI       Cork  32.3
-## 3                     Greater Belfast     720000      NI    Belfast  20.9
-## 4                         West Region     380000     ROI     Galway  13.8
-## 5                     Mid-West Region     340000     ROI   Limerick  11.4
-## 6                   South-East Region     460000     ROI  Waterford  12.8
-## 7                     Mid-East Region     475000     ROI       Bray  13.3
-## 8                       Border Region     430000     ROI   Drogheda  10.7
-## 9            East of Northern Ireland     430000      NI Ballymeena   9.5
-## 10                    Midlands Region     280000     ROI    Athlone   5.7
-## 11 West and South of Northern Ireland     400000      NI      Newry   8.4
-## 12          North of Northern Ireland     280000      NI      Derry   5.5
-## # ... with 1 more variables: GDP_percap <dbl>
-```
-
-```r
-# Multiply GDP by 1 bil
-gdp4 <- gdp3
-gdp4$GDP <- (gdp3$GDP)*(1e+09)
-```
-
-```r
-gdp4
+em_tab
 ```
 
 Graph population and GDP per capita, coloring points by country
 
 
 ```r
-gdp4 %>% 
+em_tab %>% 
   ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
   layer_points()
 ```
 
-<!--html_preserve--><div id="plot_id649788316-container" class="ggvis-output-container">
-<div id="plot_id649788316" class="ggvis-output"></div>
+<!--html_preserve--><div id="plot_id971734544-container" class="ggvis-output-container">
+<div id="plot_id971734544" class="ggvis-output"></div>
 <div class="plot-gear-icon">
 <nav class="ggvis-control">
 <a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
 <ul class="ggvis-dropdown">
 <li>
 Renderer: 
-<a id="plot_id649788316_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id649788316" data-renderer="svg">SVG</a>
+<a id="plot_id971734544_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id971734544" data-renderer="svg">SVG</a>
  | 
-<a id="plot_id649788316_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id649788316" data-renderer="canvas">Canvas</a>
+<a id="plot_id971734544_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id971734544" data-renderer="canvas">Canvas</a>
 </li>
 <li>
-<a id="plot_id649788316_download" class="ggvis-download" data-plot-id="plot_id649788316">Download</a>
+<a id="plot_id971734544_download" class="ggvis-download" data-plot-id="plot_id971734544">Download</a>
 </li>
 </ul>
 </nav>
 </div>
 </div>
 <script type="text/javascript">
-var plot_id649788316_spec = {
+var plot_id971734544_spec = {
   "data": [
     {
       "name": ".0",
@@ -468,7 +457,7 @@ var plot_id649788316_spec = {
   },
   "handlers": null
 };
-ggvis.getPlot("plot_id649788316").parseSpec(plot_id649788316_spec);
+ggvis.getPlot("plot_id971734544").parseSpec(plot_id971734544_spec);
 </script><!--/html_preserve-->
 
 For countries in the ROI (Republic of Ireland and also our region of interest, lol), 
@@ -476,7 +465,7 @@ plot GDP vs. per capita GDP and fill by Area
 
 
 ```r
-gdp4 %>%
+em_tab %>%
   filter(Country == "ROI") %>%
   droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
   ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
@@ -484,27 +473,27 @@ gdp4 %>%
   layer_points()
 ```
 
-<!--html_preserve--><div id="plot_id263034986-container" class="ggvis-output-container">
-<div id="plot_id263034986" class="ggvis-output"></div>
+<!--html_preserve--><div id="plot_id107997250-container" class="ggvis-output-container">
+<div id="plot_id107997250" class="ggvis-output"></div>
 <div class="plot-gear-icon">
 <nav class="ggvis-control">
 <a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
 <ul class="ggvis-dropdown">
 <li>
 Renderer: 
-<a id="plot_id263034986_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id263034986" data-renderer="svg">SVG</a>
+<a id="plot_id107997250_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id107997250" data-renderer="svg">SVG</a>
  | 
-<a id="plot_id263034986_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id263034986" data-renderer="canvas">Canvas</a>
+<a id="plot_id107997250_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id107997250" data-renderer="canvas">Canvas</a>
 </li>
 <li>
-<a id="plot_id263034986_download" class="ggvis-download" data-plot-id="plot_id263034986">Download</a>
+<a id="plot_id107997250_download" class="ggvis-download" data-plot-id="plot_id107997250">Download</a>
 </li>
 </ul>
 </nav>
 </div>
 </div>
 <script type="text/javascript">
-var plot_id263034986_spec = {
+var plot_id107997250_spec = {
   "data": [
     {
       "name": ".0",
@@ -651,46 +640,19 @@ var plot_id263034986_spec = {
   },
   "handlers": null
 };
-ggvis.getPlot("plot_id263034986").parseSpec(plot_id263034986_spec);
+ggvis.getPlot("plot_id107997250").parseSpec(plot_id107997250_spec);
 </script><!--/html_preserve-->
 
-Thoughts on better ways to replace the "1.3 m" population
-
-
-```r
-# gdp2$population <- if("e" %in% gdp2$population) {as.numeric(gdp2$population)}
-
-# repl.m <- function(pop) {
-#   for (r in pop) {
-#     if (contains("m")) {
-#       str_replace(., "m", "000000")
-#     } else {
-#       next
-#     }
-#   }
-# }
-# gdp2$population <- repl.m(gdp$Population)
-```
-
-
 *** 
-.  
-.  
-.  
-# Adventures in text munging and wordclouding  
-.  
-.  
-.  
-
+# Adventures in Text Munging and Wordclouding  
 ***
-
 Scrape all text (excluding citations) from the Wikipedia page
 
 
 ```r
 wiki_text <-
   wiki_page %>% 
-  html_nodes("p") %>% 
+  html_nodes("p") %>%  # if use the selector #bodyContent, citations get included as text which we don't want
   html_text
 ```
 
@@ -777,6 +739,8 @@ ireland <- str_replace_all(ireland, "[\r\n]", "")
 ```
 
 ***
+Much of the wordclouding inspiration was adapted from 
+https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
 Create a corpus
 
 
@@ -943,11 +907,11 @@ wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
           max.word = 100, color = pal)
 ```
 
-![](scrape_files/figure-html/unnamed-chunk-42-1.png)<!-- -->
+![](scrape_files/figure-html/unnamed-chunk-44-1.png)<!-- -->
 
 
 ---
 title: "scrape.R"
 author: "amanda"
-date: "Wed Sep  7 18:12:20 2016"
+date: "Thu Sep  8 08:47:21 2016"
 ---
