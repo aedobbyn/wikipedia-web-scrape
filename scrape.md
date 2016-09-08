@@ -221,13 +221,7 @@ format(em_tab$Population[1], scientific = TRUE)
 em_tab
 ```
 
-Set variable data types
-
-
-```r
-# em_tab <- em_tab
-```
-
+Set variable data types  
 Numerize variables that should be numeric
 
 
@@ -264,30 +258,37 @@ Graph population and GDP per capita, coloring points by country
 ```r
 em_tab %>% 
   ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
-  layer_points()
+  layer_points() %>% 
+  add_axis("x", title = "Population", ticks = 5) %>%
+  add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
+  add_axis("x", orient = "top", ticks = 0,  # hack to add a title since ggvis doesn't have equivalent of ggtitle() yet
+           title = "Ireland and Northern Ireland: Population and GDP per capita",
+           properties = axis_props(
+             axis = list(stroke = "white"),
+             labels = list(fontSize = 0))) 
 ```
 
-<!--html_preserve--><div id="plot_id652475445-container" class="ggvis-output-container">
-<div id="plot_id652475445" class="ggvis-output"></div>
+<!--html_preserve--><div id="plot_id493053761-container" class="ggvis-output-container">
+<div id="plot_id493053761" class="ggvis-output"></div>
 <div class="plot-gear-icon">
 <nav class="ggvis-control">
 <a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
 <ul class="ggvis-dropdown">
 <li>
 Renderer: 
-<a id="plot_id652475445_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id652475445" data-renderer="svg">SVG</a>
+<a id="plot_id493053761_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id493053761" data-renderer="svg">SVG</a>
  | 
-<a id="plot_id652475445_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id652475445" data-renderer="canvas">Canvas</a>
+<a id="plot_id493053761_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id493053761" data-renderer="canvas">Canvas</a>
 </li>
 <li>
-<a id="plot_id652475445_download" class="ggvis-download" data-plot-id="plot_id652475445">Download</a>
+<a id="plot_id493053761_download" class="ggvis-download" data-plot-id="plot_id493053761">Download</a>
 </li>
 </ul>
 </nav>
 </div>
 </div>
 <script type="text/javascript">
-var plot_id652475445_spec = {
+var plot_id493053761_spec = {
   "data": [
     {
       "name": ".0",
@@ -408,17 +409,41 @@ var plot_id652475445_spec = {
       "type": "x",
       "scale": "x",
       "orient": "bottom",
+      "title": "Population",
+      "ticks": 5,
       "layer": "back",
-      "grid": true,
-      "title": "Population"
+      "grid": true
     },
     {
       "type": "y",
       "scale": "y",
       "orient": "left",
+      "title": "GDP per capita",
+      "titleOffset": 60,
+      "ticks": 5,
+      "layer": "back",
+      "grid": true
+    },
+    {
+      "type": "x",
+      "scale": "x",
+      "orient": "top",
+      "title": "Ireland and Northern Ireland: Population and GDP per capita",
+      "ticks": 0,
       "layer": "back",
       "grid": true,
-      "title": "GDP_percap"
+      "properties": {
+        "labels": {
+          "fontSize": {
+            "value": 0
+          }
+        },
+        "axis": {
+          "stroke": {
+            "value": "white"
+          }
+        }
+      }
     }
   ],
   "padding": null,
@@ -434,11 +459,13 @@ var plot_id652475445_spec = {
   },
   "handlers": null
 };
-ggvis.getPlot("plot_id652475445").parseSpec(plot_id652475445_spec);
+ggvis.getPlot("plot_id493053761").parseSpec(plot_id493053761_spec);
 </script><!--/html_preserve-->
 
-For countries in the ROI (Republic of Ireland and also our region of interest, lol), 
-plot GDP vs. per capita GDP and fill by Area
+Looks like the ROI is generally more populous and wealthier than Northern Ireland  
+What about `Area`s within the ROI?
+For Areas in the ROI (Republic of Ireland and also our region of interest, lol), 
+plot GDP vs. per capita GDP
 
 
 ```r
@@ -447,30 +474,37 @@ em_tab %>%
   droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
   ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
   scale_numeric("x") %>%   # reorder levels by GDP
-  layer_points()
+  layer_points() %>% 
+  add_axis("x", title = "GDP", ticks = 3) %>%
+  add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
+  add_axis("x", orient = "top", ticks = 0,  
+           title = "Regions in Ireland: Population and GDP per capita",
+           properties = axis_props(
+             axis = list(stroke = "white"),
+             labels = list(fontSize = 0))) 
 ```
 
-<!--html_preserve--><div id="plot_id886004414-container" class="ggvis-output-container">
-<div id="plot_id886004414" class="ggvis-output"></div>
+<!--html_preserve--><div id="plot_id920301897-container" class="ggvis-output-container">
+<div id="plot_id920301897" class="ggvis-output"></div>
 <div class="plot-gear-icon">
 <nav class="ggvis-control">
 <a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
 <ul class="ggvis-dropdown">
 <li>
 Renderer: 
-<a id="plot_id886004414_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id886004414" data-renderer="svg">SVG</a>
+<a id="plot_id920301897_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id920301897" data-renderer="svg">SVG</a>
  | 
-<a id="plot_id886004414_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id886004414" data-renderer="canvas">Canvas</a>
+<a id="plot_id920301897_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id920301897" data-renderer="canvas">Canvas</a>
 </li>
 <li>
-<a id="plot_id886004414_download" class="ggvis-download" data-plot-id="plot_id886004414">Download</a>
+<a id="plot_id920301897_download" class="ggvis-download" data-plot-id="plot_id920301897">Download</a>
 </li>
 </ul>
 </nav>
 </div>
 </div>
 <script type="text/javascript">
-var plot_id886004414_spec = {
+var plot_id920301897_spec = {
   "data": [
     {
       "name": ".0",
@@ -591,17 +625,41 @@ var plot_id886004414_spec = {
       "type": "x",
       "scale": "x",
       "orient": "bottom",
+      "title": "GDP",
+      "ticks": 3,
       "layer": "back",
-      "grid": true,
-      "title": "GDP"
+      "grid": true
     },
     {
       "type": "y",
       "scale": "y",
       "orient": "left",
+      "title": "GDP per capita",
+      "titleOffset": 60,
+      "ticks": 5,
+      "layer": "back",
+      "grid": true
+    },
+    {
+      "type": "x",
+      "scale": "x",
+      "orient": "top",
+      "title": "Regions in Ireland: Population and GDP per capita",
+      "ticks": 0,
       "layer": "back",
       "grid": true,
-      "title": "GDP_percap"
+      "properties": {
+        "labels": {
+          "fontSize": {
+            "value": 0
+          }
+        },
+        "axis": {
+          "stroke": {
+            "value": "white"
+          }
+        }
+      }
     }
   ],
   "padding": null,
@@ -617,7 +675,7 @@ var plot_id886004414_spec = {
   },
   "handlers": null
 };
-ggvis.getPlot("plot_id886004414").parseSpec(plot_id886004414_spec);
+ggvis.getPlot("plot_id920301897").parseSpec(plot_id920301897_spec);
 </script><!--/html_preserve-->
 
 *** 
@@ -640,16 +698,9 @@ Check out our text
 head(wiki_text)
 ```
 
+
 We actually have a list of paragraphs because we used the `<p>` tag in `html_nodes()`
 
-
-```r
-is.list(wiki_text)  # why does this return `FALSE`?
-```
-
-```
-## [1] FALSE
-```
 
 ```r
 length(wiki_text)  # so we have 156 paragraphs
@@ -659,7 +710,7 @@ length(wiki_text)  # so we have 156 paragraphs
 ## [1] 156
 ```
 
-The third paragraph
+For example, we can get the third paragraph of the page with
 
 
 ```r
@@ -670,7 +721,7 @@ wiki_text[[3]]
 ## [1] "Politically, Ireland is divided between the Republic of Ireland (officially named Ireland), which covers five-sixths of the island, and Northern Ireland, which is part of the United Kingdom, in the northeast of the island. In 2011 the population of Ireland was about 6.4 million, ranking it the second-most populous island in Europe after Great Britain. Just under 4.6 million live in the Republic of Ireland and just over 1.8 million live in Northern Ireland.[7]"
 ```
 
-Combine our lists to one vector 
+Combine our lists to one vector  
 Note that just doing `unlist(wiki_text)` doesn't work
 
 
@@ -681,9 +732,6 @@ for (i in 2:(length(wiki_text))) {   # omit first paragraph
 }
 ```
 
-```r
-head(ireland)
-```
 
 ```r
 length(ireland)  # good, our 156 paragraphs are now one vector
@@ -711,13 +759,12 @@ Remove `\n` newlines
 
 
 ```r
-# ireland <- gsub("\r?\n|\r", "", ireland)
-ireland <- str_replace_all(ireland, "[\r\n]", "")
+ireland <- str_replace_all(ireland, "[\r\n]", "")  # same as # ireland <- gsub("\r?\n|\r", "", ireland)
 ```
 
 ***
-Much of the wordclouding inspiration was adapted from 
-https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
+Much of the wordclouding inspiration was adapted 
+from [this blog](https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/)
 Create a corpus
 
 
@@ -843,7 +890,9 @@ Remove "the" and "and"
 i.dat.trim <- i.dat %>% 
   filter(
     !(word %in% c("the", "and")))
+```
 
+```r
 head(i.dat.trim)
 ```
 
@@ -861,19 +910,14 @@ Set RColorBrewer palate
 
 
 ```r
-pal <- brewer.pal(20,"Dark2")
-```
-
-```
-## Warning in brewer.pal(20, "Dark2"): n too large, allowed maximum for palette Dark2 is 8
-## Returning the palette you asked for with that many colors
+palette <- brewer.pal(12,"Paired")
 ```
 
 Set background to black
 
 
 ```r
-par(bg = 'dark green')
+par(bg = 'black')
 ```
 
 Make the wordcloud
@@ -881,14 +925,15 @@ Make the wordcloud
 
 ```r
 wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
-          max.word = 100, color = pal)
+          max.word = 200, color = palette,
+          vfont = c("serif", "plain"))
 ```
 
-![](scrape_files/figure-html/unnamed-chunk-47-1.png)<!-- -->
+![](scrape_files/figure-html/ireland_wordcloud-1.png)<!-- -->
 
 
 ---
 title: "scrape.R"
 author: "amanda"
-date: "Thu Sep  8 09:03:26 2016"
+date: "Thu Sep  8 17:37:18 2016"
 ---

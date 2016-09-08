@@ -89,6 +89,7 @@ length(wiki_table) # a list of 2
 emerald_table <- wiki_table[[2]]
 
 #' Rename columns that contain `€` symbols
+#+
 em_tab <- emerald_table %>% 
   rename(
     GDP = `GDP €`,
@@ -98,26 +99,32 @@ em_tab <- emerald_table %>%
 em_tab
 
 #' Take out last row that contains totals
+#+
 em_tab <- em_tab[1:(nrow(em_tab) - 1), ]
 
 #' Check out table structure. All varaibles are characters.
+#+
 str(em_tab)
 
 #' Make the table into a `tibble` so we can more easily see variable types
+#+
 em_tab <- as_tibble(em_tab)
 
 #' Take out `€` symbols in rows and "bn" for billion in GDP column
+#+
 em_tab$GDP <- str_replace_all(em_tab$GDP, "€", "")
 em_tab$GDP <- str_replace_all(em_tab$GDP, "bn", "")
 em_tab$GDP_percap <- str_replace_all(em_tab$GDP_percap, "€", "")
 
 
 #' Replace "m" for million (in the `Population` column) with scientific notation characters
+#+
 em_tab$Population <- em_tab$Population %>% 
   gsub(" m", "e+06", .) 
 em_tab$Population
 
 #' Take that element of `Population` into standard notation
+#+
 em_tab$Population[1] <- as.numeric(em_tab$Population[1])
 format(em_tab$Population[1], scientific = TRUE)
 
@@ -127,12 +134,14 @@ em_tab
 #' Set variable data types  
 
 #' Numerize variables that should be numeric
+#+
 to.numerize <- c("Population", "GDP", "GDP_percap")
 em_tab[, to.numerize] <- data.frame(apply
                                     (em_tab[, to.numerize], 2, 
                                     parse_number)) # use readr::parse_numer
 
 #' Factorize variables that should be factors
+#+
 em_tab <- em_tab %>%
   rsalad::dfFactorize(
     ignore = c("Population", "GDP", "GDP_percap")  # in other words, select Area, City, and Country
@@ -141,6 +150,7 @@ em_tab <- em_tab %>%
 
 #' Multiply GDP by 1 bil  
 #' (We took out the trailing "b" earlier)
+#+
 em_tab <- em_tab
 em_tab$GDP <- (em_tab$GDP)*(1e+09)
 
@@ -149,21 +159,38 @@ em_tab
 
 
 #' Graph population and GDP per capita, coloring points by country
+#+ country_gdp_ggvis
 em_tab %>% 
   ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
-  layer_points()
+  layer_points() %>% 
+  add_axis("x", title = "Population", ticks = 5) %>%
+  add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
+  add_axis("x", orient = "top", ticks = 0,  # hack to add a title since ggvis doesn't have equivalent of ggtitle() yet
+           title = "Ireland and Northern Ireland: Population and GDP per capita",
+           properties = axis_props(
+             axis = list(stroke = "white"),
+             labels = list(fontSize = 0))) 
 
-#' Looks like the ROI is generally wealthier than Northern Ireland  
+
+#' Looks like the ROI is generally more populous and wealthier than Northern Ireland  
 #' What about `Area`s within the ROI?
 
 #' For Areas in the ROI (Republic of Ireland and also our region of interest, lol), 
-#' plot GDP vs. per capita GDP and fill by Area
+#' plot GDP vs. per capita GDP
+#+ ROI_gdp_ggvis
 em_tab %>%
   filter(Country == "ROI") %>%
   droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
   ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
   scale_numeric("x") %>%   # reorder levels by GDP
-  layer_points()
+  layer_points() %>% 
+  add_axis("x", title = "GDP", ticks = 3) %>%
+  add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
+  add_axis("x", orient = "top", ticks = 0,  
+           title = "Regions in Ireland: Population and GDP per capita",
+           properties = axis_props(
+             axis = list(stroke = "white"),
+             labels = list(fontSize = 0))) 
 
 
 
@@ -202,10 +229,12 @@ is.list(wiki_text)  # why does this return `FALSE`?
 length(wiki_text)  # so we have 156 paragraphs
 
 #' For example, we can get the third paragraph of the page with
+#+
 wiki_text[[3]]
 
 #' Combine our lists to one vector  
 #' Note that just doing `unlist(wiki_text)` doesn't work
+#+
 ireland <- NULL
 for (i in 2:(length(wiki_text))) {   # omit first paragraph
   ireland <- paste(ireland, as.character(wiki_text[i]), sep = ' ')
@@ -216,21 +245,24 @@ head(ireland)
 length(ireland)  # good, our 156 paragraphs are now one vector
 
 #' Get all text to lowercase
+#+
 ireland <- tolower(ireland)
 
 #' Take out all numbers
+#+
 ireland <- str_replace_all(ireland,"[0-9]+","")
 
 #' Remove `\n` newlines
-# ireland <- gsub("\r?\n|\r", "", ireland)
-ireland <- str_replace_all(ireland, "[\r\n]", "")
+#+
+ireland <- str_replace_all(ireland, "[\r\n]", "")  # same as # ireland <- gsub("\r?\n|\r", "", ireland)
 
 #' ***
 
-#' Much of the wordclouding inspiration was adapted from 
-#' https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/  
+#' Much of the wordclouding inspiration was adapted 
+#' from [this blog](https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/)
 
 #' Create a corpus
+#+
 i.corp <- Corpus(VectorSource(ireland))
 
 #' Wrap strings into paragraphs so we can see what we have better  
@@ -241,10 +273,12 @@ strwrap(i.corp[[1]]) # [[1]] because this corpus contains one document
 
 
 #' Take out punctuation and white space
+#+
 i.corp <- tm_map(i.corp, removePunctuation)
 i.corp <- tm_map(i.corp, stripWhitespace)
 
 #' Make corpus a plain text doc
+#+
 i.corp <- tm_map(i.corp, PlainTextDocument)
 
 #' View what we've got
@@ -256,6 +290,7 @@ strwrap(i.corp[[1]])
 
 
 #' Make a document feature or document term matrix
+#+
 i.dfm <- tm::TermDocumentMatrix(i.corp)
 
 #' Check out rows 1000 to 1010
@@ -265,35 +300,48 @@ inspect(i.dfm[1000:1010, ] )
 
 #' Make a wordcloud  
 #' First convert dfm to matrix
+#+
 i.matrix <- as.matrix(i.dfm)
 
 #' Label the frequency column
+#+
 colnames(i.matrix) <- 'frequency'
 
 #' Sort terms by frequency
+#+
 i.sorted <- sort(rowSums(i.matrix), decreasing = TRUE)
 
 #' Ten most frequent words
+#+
 i.sorted[1:10]
 
 #' Make into a data.frame
+#+
 i.dat <- data.frame(word = names(i.sorted), freq = i.sorted)
 
 #' Remove "the" and "and"
+#+
 i.dat.trim <- i.dat %>% 
   filter(
     !(word %in% c("the", "and")))
 
+#+
 head(i.dat.trim)
 
 #' Set RColorBrewer palate
-pal <- brewer.pal(20,"Dark2")
+#+
+palette <- brewer.pal(12,"Paired")
 #' Set background to black
-par(bg = 'dark green')
+par(bg = 'black')
 
 #' Make the wordcloud
+#+ ireland_wordcloud, dev=c('png')
 wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
-          max.word = 100, color = pal)
+          max.word = 200, color = palette,
+          vfont = c("serif", "plain"))
+
+
+
 
 
 
