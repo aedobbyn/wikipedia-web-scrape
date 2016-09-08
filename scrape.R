@@ -151,19 +151,7 @@ gdp4 %>%
 
 
 
-#' Thoughts on better ways to replace the "1.3 m" population
-# gdp2$population <- if("e" %in% gdp2$population) {as.numeric(gdp2$population)}
 
-# repl.m <- function(pop) {
-#   for (r in pop) {
-#     if (contains("m")) {
-#       str_replace(., "m", "000000")
-#     } else {
-#       next
-#     }
-#   }
-# }
-# gdp2$population <- repl.m(gdp$Population)
 
 
 #'
