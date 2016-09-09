@@ -15,9 +15,8 @@
 #' + Munge the text of the entire page and create word frequency wordclouds to see
 #' what words are mentioned most often on the page  
 
-#' ***
 
-#' This doc was compiled using knitr::spin, 
+#' * This doc was compiled using knitr::spin, 
 #' thanks to a [post by Dean Attali](http://deanattali.com/2015/03/24/knitrs-best-hidden-gem-spin/)  
 #'   
 #'   
@@ -305,7 +304,7 @@ ireland <- str_replace_all(ireland, "[\r\n]", "")  # same as # ireland <- gsub("
 #' #### Begin wordclouding
 
 #' Much of the wordclouding inspiration was adapted 
-#' from [this blog](https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/)
+#' from [this blog](https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/)  
 
 #' Create a corpus
 #+
