@@ -236,7 +236,7 @@ wiki_text[[3]]
 #' Note that just doing `unlist(wiki_text)` doesn't work
 #+
 ireland <- NULL
-for (i in 2:(length(wiki_text))) {   # omit first paragraph
+for (i in 2:(length(wiki_text))) {   # omit first paragraph because it just says "in Europe  (green & dark grey)"
   ireland <- paste(ireland, as.character(wiki_text[i]), sep = ' ')
 }
 #+ eval=FALSE, echo=FALSE

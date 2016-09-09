@@ -95,6 +95,126 @@ em_tab$GDP <- (em_tab$GDP)*(1e+09)
 em_tab
 
 
+# --------- translate ggvis to ggplot ------------ #
+# old
+#+ country_gdp_ggvis
+em_tab %>% 
+  ggplot(aes(Population, GDP_percap), fill = Country) %>% 
+  layer_points() %>% 
+  add_axis("x", title = "Population", ticks = 5) %>%
+  add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
+  add_axis("x", orient = "top", ticks = 0,  # hack to add a title since ggvis doesn't have equivalent of ggtitle() yet
+           title = "Ireland and Northern Ireland: Population and GDP per capita",
+           properties = axis_props(
+             axis = list(stroke = "white"),
+             labels = list(fontSize = 0))) 
+
+# new
+#+ country_gdp_ggvis
+ggplot(em_tab, aes(x=Population, y=GDP_percap, colour=Country)) + 
+  geom_point() +
+  ggtitle("Ireland and Northern Ireland: \n Population and GDP per capita") +
+  ylab("GDP per capita") +
+  theme_classic() +
+  theme(axis.line.x = element_line(color="black", size = 0.5), # theme_classic() removes axes so draw them back in
+        axis.line.y = element_line(color="black", size = 0.5)) 
+
+
+  
+#old
+#+ ROI_gdp_ggvis
+em_tab %>%
+filter(Country == "ROI") %>%
+droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
+ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
+scale_numeric("x") %>%   # reorder levels by GDP
+layer_points() %>% 
+add_axis("x", title = "GDP", ticks = 3) %>%
+add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
+add_axis("x", orient = "top", ticks = 0,  
+         title = "Regions in Ireland: Population and GDP per capita",
+         properties = axis_props(
+           axis = list(stroke = "white"),
+           labels = list(fontSize = 0))) 
+
+# new
+#+ ROI_gdp_ggvis
+em_ROI <- em_tab %>%
+  filter(Country == "ROI") %>% 
+  droplevels()
+
+ggplot(em_ROI, aes(x=GDP, y=GDP_percap, colour=Area)) + 
+  geom_point() +
+  ggtitle("Regions in Ireland: \n Population and GDP per capita") +
+  ylab("GDP per capita") +
+  theme_classic() +
+  theme(axis.line.x = element_line(color="black", size = 0.5), # theme_classic() removes axes so draw them back in
+        axis.line.y = element_line(color="black", size = 0.5)) 
+
+
+
+
+# ----------------------------------------------------
+
+
+
+
+
+
+
+
+####--------------------------------------####
+# library(proxy) 
+# library(quanteda)
+# # make a new corpus with quanteda
+# i.corp.2 <- corpus(ireland)
+# 
+# # make a new dfm with quanteda
+# i.dfm.2 <- dfm(i.corp.2, clean = T,  stem = F, 
+#                verbose = F,
+#                ignoredFeatures = stopwords("english"))
+# # check dimensions
+# dim(i.dfm.2)
+# 
+# # look at first 10 elements (now these are columns not rows)
+# sort(i.dfm.2)[,1:10]
+# 
+# # return new DFM weighted by relative frequency
+# i.dfm.3 <- weight(i.dfm.2, type = "relFreq")
+# 
+# # use `dist` from `proxy` package to get similarity matrix between
+# sim_matrix <- dist(scale(i.dfm.3))
+# 
+# # look at first first five elements
+# sort(sim_matrix)[,1:5]
+# 
+# # hierarchical cluster analysis
+# cluster <- hclust(sim_matrix, method="ward.D")
+# 
+# # plot the cluster
+# plot(cluster, labels = F) 
+####--------------------------------------####
+
+
+
+####--------------------------------------####
+## k means
+# 
+# k = 20 
+# kmeans_clust = kmeans(i.dfm.2, centers = k)
+# groups = kmeans_clust$cluster
+# 
+# #### Plotting KMeans
+# # par(mfrow = c(4,4))
+# 
+# for(group in 1:16){
+#   group_dat = i.dfm.2[which(groups==group)]
+#   plot(group_dat, max.words = 20)
+# }
+####
+####--------------------------------------####
+
+
 
 
 # How we had it pre-em_tab
@@ -190,4 +310,5 @@ em_tab
 #     "Area", "Country", "City"
 #   ) %>% 
 #   data.frame(apply(., 2, factor))
+
 
