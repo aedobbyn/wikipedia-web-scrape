@@ -291,7 +291,6 @@ em_tab$GDP <- (em_tab$GDP)*(1e+09)
 
 
 Graph population and GDP per capita, coloring points by country
--------- The ggvis version (does not render in GitHub) ---------# 
 
 
 
@@ -313,22 +312,6 @@ So it looks like the ROI is generally more populous and wealthier than Northern 
 What about `Area`s within the ROI?  
 
 
-
-```r
-# em_tab %>%
-#   filter(Country == "ROI") %>%
-#   droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
-#   ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
-#   scale_numeric("x") %>%   # reorder levels by GDP
-#   layer_points() %>%
-#   add_axis("x", title = "GDP", ticks = 3) %>%
-#   add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>%
-#   add_axis("x", orient = "top", ticks = 0,
-#            title = "Regions in Ireland: Population and GDP per capita",
-#            properties = axis_props(
-#              axis = list(stroke = "white"),
-#              labels = list(fontSize = 0)))
-```
 
 Filter down to just areas in the ROI (Republic of Ireland 
 and also our region of interest, lol)
@@ -443,6 +426,7 @@ ireland <- str_replace_all(ireland, "[\r\n]", "")  # same as # ireland <- gsub("
 ```
 
 ***
+#### Begin wordclouding
 Much of the wordclouding inspiration was adapted 
 from [this blog](https://quantmacro.wordpress.com/2016/04/30/web-scraping-for-text-mining-in-r/)
 Create a corpus
@@ -453,8 +437,7 @@ i.corp <- Corpus(VectorSource(ireland))
 ```
 
 Wrap strings into paragraphs so we can see what we have better  
-Not assigning this to i.corp object, i.e., not i.corp <- str_wrap(i.corp[[1]])  
-Note: this is the base::strwrap not stringr::str_wrap
+Note that this is the `base::strwrap` not `stringr::str_wrap`
 
 
 ```r
@@ -520,8 +503,7 @@ inspect(i.dfm[1000:1010, ] )
 ##   extent               1
 ```
 
-Make a wordcloud  
-First convert dfm to matrix
+Convert dfm to matrix
 
 
 ```r
@@ -542,7 +524,7 @@ Sort terms by frequency
 i.sorted <- sort(rowSums(i.matrix), decreasing = TRUE)
 ```
 
-Ten most frequent words
+Check out the ten most frequent words in the doc
 
 
 ```r
@@ -556,34 +538,37 @@ i.sorted[1:10]
 ##      68
 ```
 
-Make into a data.frame
+Make our matrix into a data.frame, taking it from wide to long format
 
 
 ```r
 i.dat <- data.frame(word = names(i.sorted), freq = i.sorted)
 ```
 
-Remove "the" and "and"
+Check out the most frequent words
+
+
+```r
+head(i.dat)
+```
+
+```
+##            word freq
+## the         the 1088
+## and         and  459
+## ireland ireland  252
+## irish     irish  125
+## was         was  118
+## with       with  104
+```
+
+Remove "the" and "and" because they're not interesting
 
 
 ```r
 i.dat.trim <- i.dat %>% 
   filter(
     !(word %in% c("the", "and")))
-```
-
-```r
-head(i.dat.trim)
-```
-
-```
-##      word freq
-## 1 ireland  252
-## 2   irish  125
-## 3     was  118
-## 4    with  104
-## 5     for   79
-## 6    from   77
 ```
 
 Set RColorBrewer palate
@@ -600,7 +585,7 @@ Set background to black
 par(bg = 'black')
 ```
 
-Make the wordcloud
+Generate the wordcloud!
 
 
 ```r
@@ -615,5 +600,5 @@ wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
 ---
 title: "scrape.R"
 author: "amanda"
-date: "Fri Sep  9 01:58:58 2016"
+date: "Fri Sep  9 02:08:58 2016"
 ---

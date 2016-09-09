@@ -176,8 +176,8 @@ em_tab
 
 #' Graph population and GDP per capita, coloring points by country
 
-#' -------- The ggvis version (does not render in GitHub) ---------# 
 #+ echo=FALSE, eval=FALSE
+# The ggvis version (does not render in GitHub)
 # em_tab %>% 
 #   ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
 #   layer_points() %>% 
@@ -207,7 +207,7 @@ print(gdp_by_country_plot)
 
 
 #+ echo=FALSE, eval=FALSE
-# ------- The ggvis version (does not render in GitHub) ---------# 
+# The ggvis version (does not render in GitHub)
 # em_tab %>%
 #   filter(Country == "ROI") %>%
 #   droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
@@ -343,8 +343,7 @@ inspect(i.dfm[1000:1010, ] )
 
 
 
-#' Make a wordcloud  
-#' First convert dfm to matrix
+#' Convert dfm to matrix
 #+
 i.matrix <- as.matrix(i.dfm)
 
@@ -356,22 +355,24 @@ colnames(i.matrix) <- 'frequency'
 #+
 i.sorted <- sort(rowSums(i.matrix), decreasing = TRUE)
 
-#' Ten most frequent words
+#' Check out the ten most frequent words in the doc
 #+
 i.sorted[1:10]
 
-#' Make into a data.frame
+#' Make our matrix into a data.frame, taking it from wide to long format
 #+
 i.dat <- data.frame(word = names(i.sorted), freq = i.sorted)
 
-#' Remove "the" and "and"
+#' Check out the most frequent words
+#+
+head(i.dat)
+
+#' Remove "the" and "and" because they're not interesting
 #+
 i.dat.trim <- i.dat %>% 
   filter(
     !(word %in% c("the", "and")))
 
-#+
-head(i.dat.trim)
 
 #' Set RColorBrewer palate
 #+
@@ -379,7 +380,7 @@ palette <- brewer.pal(12,"Paired")
 #' Set background to black
 par(bg = 'black')
 
-#' Make the wordcloud
+#' Generate the wordcloud!
 #+ ireland_wordcloud, dev=c('png')
 wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
           max.word = 200, color = palette,
