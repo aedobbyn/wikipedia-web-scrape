@@ -119,33 +119,47 @@ str(em_tab)
 #+
 em_tab <- as_tibble(em_tab)
 
-#' Take out `€` symbols in rows and "bn" for billion in GDP column
+#' We need to do some string substitutions:  
+#' -- There's an "m" for million in the first row of the `Population`. We need
+#' to make it into something that can be parsed as a number.  
+#' (Since the column is still of type character and not numeric, we
+#' can just replace it with scientific notation characters.)  
+#' -- We want to do a similar thing for "bn" for billion in the GDP columns.  
+#' -- We also want to take out the out `€` symbol  
+
+#' So, we'll make a custom `gsub` function returns a tibble.
+
 #+
-em_tab$GDP <- str_replace_all(em_tab$GDP, "€", "")
-em_tab$GDP <- str_replace_all(em_tab$GDP, "bn", "")
-em_tab$GDP_percap <- str_replace_all(em_tab$GDP_percap, "€", "")
+multi_sub <- function(input, output, dat) {
+  result <- dat
+  for (i in 1 : length(input)) {
+    result <- as_tibble(as.data.frame
+                        (sapply(dat, gsub, 
+                                pattern=input[i], replacement=output[i], 
+                                   result)))
+  }
+  result
+}
 
 
-#' There's an "m" for million in the first row of the `Population` 
-#' column. We need to make the m into something that can be interpreted as
-#' a number.
-#' Since the column is still of type charager and not numeric, we
-#' can just replace it with scientific notation characters with a `gsub`.
+#' Make our replacements
 #+
-em_tab$Population <- em_tab$Population %>% 
-  gsub(" m", "e+06", .) 
+em_tab <- multi_sub(input = " m", output = "e+06", dat = em_tab)
+em_tab <- multi_sub(input = "bn", output = "", dat = em_tab)
+em_tab <- multi_sub(input = "€", output = "", dat = em_tab)
 
-#' Take a look at the `Population` vector to make sure our `gsub` worked.
-em_tab$Population  # good
+#' Our function makes all columns factors, so make the columns 
+#' we need as numeric (eventually) into characters.
+#+
+em_tab$Population <- as.character(em_tab$Population)
+em_tab$GDP <- as.character(em_tab$GDP)
+em_tab$GDP_percap <- as.character(em_tab$GDP_percap)
 
 #' Make that first element of `Population` into standard notation
 #+
-em_tab$Population[1] <- as.numeric(em_tab$Population[1])
+em_tab$Population[1] <- as.numeric(em_tab$Population[1]) # we first have to make it numeric
 format(em_tab$Population[1], scientific = TRUE)
 
-#' Check out our table
-#+ 
-em_tab
 
 #' #### Set variable data types  
 
@@ -169,9 +183,12 @@ em_tab <- em_tab %>%
 em_tab <- em_tab
 em_tab$GDP <- (em_tab$GDP)*(1e+09)
 
-#+ eval=FALSE, echo=FALSE
-em_tab
+#' Check out our table
+#+ 
+kable(em_tab, format = "markdown")
 
+#' ***
+#' #### Visualize
 
 #' Graph population and GDP per capita, coloring points by country
 
