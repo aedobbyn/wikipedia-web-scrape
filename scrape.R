@@ -5,6 +5,7 @@
 #'  email: aedobbyn@uchicago.edu
 #' output:
 #'  html_document:
+#'    fig_caption: yes
 #'    keep_md: true
 #' ---
 
