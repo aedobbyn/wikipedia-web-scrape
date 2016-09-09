@@ -159,17 +159,26 @@ em_tab
 
 
 #' Graph population and GDP per capita, coloring points by country
+# The ggvis version
+# em_tab %>% 
+#   ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
+#   layer_points() %>% 
+#   add_axis("x", title = "Population", ticks = 5) %>%
+#   add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
+#   add_axis("x", orient = "top", ticks = 0,  # hack to add a title since ggvis doesn't have equivalent of ggtitle() yet
+#            title = "Ireland and Northern Ireland: Population and GDP per capita",
+#            properties = axis_props(
+#              axis = list(stroke = "white"),
+#              labels = list(fontSize = 0))) 
+
 #+ country_gdp_ggvis
-em_tab %>% 
-  ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
-  layer_points() %>% 
-  add_axis("x", title = "Population", ticks = 5) %>%
-  add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
-  add_axis("x", orient = "top", ticks = 0,  # hack to add a title since ggvis doesn't have equivalent of ggtitle() yet
-           title = "Ireland and Northern Ireland: Population and GDP per capita",
-           properties = axis_props(
-             axis = list(stroke = "white"),
-             labels = list(fontSize = 0))) 
+ggplot(em_tab, aes(x=Population, y=GDP_percap, colour=Country)) + 
+  geom_point() +
+  ggtitle("Ireland and Northern Ireland: \n Population and GDP per capita") +
+  ylab("GDP per capita") +
+  theme_classic() +
+  theme(axis.line.x = element_line(color="black", size = 0.3), # theme_classic() removes axes so draw them back in
+        axis.line.y = element_line(color="black", size = 0.3)) 
 
 
 #' Looks like the ROI is generally more populous and wealthier than Northern Ireland  
@@ -177,20 +186,36 @@ em_tab %>%
 
 #' For Areas in the ROI (Republic of Ireland and also our region of interest, lol), 
 #' plot GDP vs. per capita GDP
+# # ggvis version
+# em_tab %>%
+#   filter(Country == "ROI") %>%
+#   droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
+#   ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
+#   scale_numeric("x") %>%   # reorder levels by GDP
+#   layer_points() %>% 
+#   add_axis("x", title = "GDP", ticks = 3) %>%
+#   add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
+#   add_axis("x", orient = "top", ticks = 0,  
+#            title = "Regions in Ireland: Population and GDP per capita",
+#            properties = axis_props(
+#              axis = list(stroke = "white"),
+#              labels = list(fontSize = 0))) 
+
+#' Filter down to just areas in Ireland
+#+ make
+em_ROI <- em_tab %>%
+  filter(Country == "ROI") %>% 
+  droplevels()  # drop unused Areas (e.g., Greater Belfast) from legend
+
 #+ ROI_gdp_ggvis
-em_tab %>%
-  filter(Country == "ROI") %>%
-  droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
-  ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
-  scale_numeric("x") %>%   # reorder levels by GDP
-  layer_points() %>% 
-  add_axis("x", title = "GDP", ticks = 3) %>%
-  add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
-  add_axis("x", orient = "top", ticks = 0,  
-           title = "Regions in Ireland: Population and GDP per capita",
-           properties = axis_props(
-             axis = list(stroke = "white"),
-             labels = list(fontSize = 0))) 
+ggplot(em_ROI, aes(x=GDP, y=GDP_percap, colour=Area)) + 
+  geom_point() +
+  ggtitle("Regions in Ireland: \n Population and GDP per capita") +
+  ylab("GDP per capita") +
+  theme_classic() +
+  theme(axis.line.x = element_line(color="black", size = 0.3), # theme_classic() removes axes so draw them back in
+        axis.line.y = element_line(color="black", size = 0.3)) 
+
 
 
 

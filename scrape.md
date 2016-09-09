@@ -256,211 +256,30 @@ Graph population and GDP per capita, coloring points by country
 
 
 ```r
-em_tab %>% 
-  ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
-  layer_points() %>% 
-  add_axis("x", title = "Population", ticks = 5) %>%
-  add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
-  add_axis("x", orient = "top", ticks = 0,  # hack to add a title since ggvis doesn't have equivalent of ggtitle() yet
-           title = "Ireland and Northern Ireland: Population and GDP per capita",
-           properties = axis_props(
-             axis = list(stroke = "white"),
-             labels = list(fontSize = 0))) 
+# The ggvis version
+# em_tab %>% 
+#   ggvis(~Population, ~GDP_percap, fill = ~Country) %>% 
+#   layer_points() %>% 
+#   add_axis("x", title = "Population", ticks = 5) %>%
+#   add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
+#   add_axis("x", orient = "top", ticks = 0,  # hack to add a title since ggvis doesn't have equivalent of ggtitle() yet
+#            title = "Ireland and Northern Ireland: Population and GDP per capita",
+#            properties = axis_props(
+#              axis = list(stroke = "white"),
+#              labels = list(fontSize = 0))) 
 ```
 
-<!--html_preserve--><div id="plot_id493053761-container" class="ggvis-output-container">
-<div id="plot_id493053761" class="ggvis-output"></div>
-<div class="plot-gear-icon">
-<nav class="ggvis-control">
-<a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
-<ul class="ggvis-dropdown">
-<li>
-Renderer: 
-<a id="plot_id493053761_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id493053761" data-renderer="svg">SVG</a>
- | 
-<a id="plot_id493053761_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id493053761" data-renderer="canvas">Canvas</a>
-</li>
-<li>
-<a id="plot_id493053761_download" class="ggvis-download" data-plot-id="plot_id493053761">Download</a>
-</li>
-</ul>
-</nav>
-</div>
-</div>
-<script type="text/javascript">
-var plot_id493053761_spec = {
-  "data": [
-    {
-      "name": ".0",
-      "format": {
-        "type": "csv",
-        "parse": {
-          "Population": "number",
-          "GDP_percap": "number"
-        }
-      },
-      "values": "\"Country\",\"Population\",\"GDP_percap\"\n\"ROI\",1300000,57200\n\"ROI\",670000,48500\n\"NI\",720000,33550\n\"ROI\",380000,31500\n\"ROI\",340000,30300\n\"ROI\",460000,25600\n\"ROI\",475000,24700\n\"ROI\",430000,21100\n\"NI\",430000,20300\n\"ROI\",280000,20100\n\"NI\",4e+05,19300\n\"NI\",280000,18400"
-    },
-    {
-      "name": "scale/fill",
-      "format": {
-        "type": "csv",
-        "parse": {}
-      },
-      "values": "\"domain\"\n\"NI\"\n\"ROI\""
-    },
-    {
-      "name": "scale/x",
-      "format": {
-        "type": "csv",
-        "parse": {
-          "domain": "number"
-        }
-      },
-      "values": "\"domain\"\n229000\n1351000"
-    },
-    {
-      "name": "scale/y",
-      "format": {
-        "type": "csv",
-        "parse": {
-          "domain": "number"
-        }
-      },
-      "values": "\"domain\"\n16460\n59140"
-    }
-  ],
-  "scales": [
-    {
-      "name": "fill",
-      "type": "ordinal",
-      "domain": {
-        "data": "scale/fill",
-        "field": "data.domain"
-      },
-      "points": true,
-      "sort": false,
-      "range": "category10"
-    },
-    {
-      "name": "x",
-      "domain": {
-        "data": "scale/x",
-        "field": "data.domain"
-      },
-      "zero": false,
-      "nice": false,
-      "clamp": false,
-      "range": "width"
-    },
-    {
-      "name": "y",
-      "domain": {
-        "data": "scale/y",
-        "field": "data.domain"
-      },
-      "zero": false,
-      "nice": false,
-      "clamp": false,
-      "range": "height"
-    }
-  ],
-  "marks": [
-    {
-      "type": "symbol",
-      "properties": {
-        "update": {
-          "size": {
-            "value": 50
-          },
-          "fill": {
-            "scale": "fill",
-            "field": "data.Country"
-          },
-          "x": {
-            "scale": "x",
-            "field": "data.Population"
-          },
-          "y": {
-            "scale": "y",
-            "field": "data.GDP_percap"
-          }
-        },
-        "ggvis": {
-          "data": {
-            "value": ".0"
-          }
-        }
-      },
-      "from": {
-        "data": ".0"
-      }
-    }
-  ],
-  "legends": [
-    {
-      "orient": "right",
-      "fill": "fill",
-      "title": "Country"
-    }
-  ],
-  "axes": [
-    {
-      "type": "x",
-      "scale": "x",
-      "orient": "bottom",
-      "title": "Population",
-      "ticks": 5,
-      "layer": "back",
-      "grid": true
-    },
-    {
-      "type": "y",
-      "scale": "y",
-      "orient": "left",
-      "title": "GDP per capita",
-      "titleOffset": 60,
-      "ticks": 5,
-      "layer": "back",
-      "grid": true
-    },
-    {
-      "type": "x",
-      "scale": "x",
-      "orient": "top",
-      "title": "Ireland and Northern Ireland: Population and GDP per capita",
-      "ticks": 0,
-      "layer": "back",
-      "grid": true,
-      "properties": {
-        "labels": {
-          "fontSize": {
-            "value": 0
-          }
-        },
-        "axis": {
-          "stroke": {
-            "value": "white"
-          }
-        }
-      }
-    }
-  ],
-  "padding": null,
-  "ggvis_opts": {
-    "keep_aspect": false,
-    "resizable": true,
-    "padding": {},
-    "duration": 250,
-    "renderer": "svg",
-    "hover_duration": 0,
-    "width": 672,
-    "height": 480
-  },
-  "handlers": null
-};
-ggvis.getPlot("plot_id493053761").parseSpec(plot_id493053761_spec);
-</script><!--/html_preserve-->
+```r
+ggplot(em_tab, aes(x=Population, y=GDP_percap, colour=Country)) + 
+  geom_point() +
+  ggtitle("Ireland and Northern Ireland: \n Population and GDP per capita") +
+  ylab("GDP per capita") +
+  theme_classic() +
+  theme(axis.line.x = element_line(color="black", size = 0.3), # theme_classic() removes axes so draw them back in
+        axis.line.y = element_line(color="black", size = 0.3)) 
+```
+
+![](scrape_files/figure-html/country_gdp_ggvis-1.png)<!-- -->
 
 Looks like the ROI is generally more populous and wealthier than Northern Ireland  
 What about `Area`s within the ROI?
@@ -469,214 +288,42 @@ plot GDP vs. per capita GDP
 
 
 ```r
-em_tab %>%
-  filter(Country == "ROI") %>%
-  droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
-  ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
-  scale_numeric("x") %>%   # reorder levels by GDP
-  layer_points() %>% 
-  add_axis("x", title = "GDP", ticks = 3) %>%
-  add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
-  add_axis("x", orient = "top", ticks = 0,  
-           title = "Regions in Ireland: Population and GDP per capita",
-           properties = axis_props(
-             axis = list(stroke = "white"),
-             labels = list(fontSize = 0))) 
+# # ggvis version
+# em_tab %>%
+#   filter(Country == "ROI") %>%
+#   droplevels() %>%    # drop unused Areas (e.g., Greater Belfast) from legend
+#   ggvis(~GDP, ~GDP_percap, fill=~Area) %>%
+#   scale_numeric("x") %>%   # reorder levels by GDP
+#   layer_points() %>% 
+#   add_axis("x", title = "GDP", ticks = 3) %>%
+#   add_axis("y", title = "GDP per capita", ticks = 5, title_offset = 60) %>% 
+#   add_axis("x", orient = "top", ticks = 0,  
+#            title = "Regions in Ireland: Population and GDP per capita",
+#            properties = axis_props(
+#              axis = list(stroke = "white"),
+#              labels = list(fontSize = 0))) 
 ```
 
-<!--html_preserve--><div id="plot_id920301897-container" class="ggvis-output-container">
-<div id="plot_id920301897" class="ggvis-output"></div>
-<div class="plot-gear-icon">
-<nav class="ggvis-control">
-<a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
-<ul class="ggvis-dropdown">
-<li>
-Renderer: 
-<a id="plot_id920301897_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id920301897" data-renderer="svg">SVG</a>
- | 
-<a id="plot_id920301897_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id920301897" data-renderer="canvas">Canvas</a>
-</li>
-<li>
-<a id="plot_id920301897_download" class="ggvis-download" data-plot-id="plot_id920301897">Download</a>
-</li>
-</ul>
-</nav>
-</div>
-</div>
-<script type="text/javascript">
-var plot_id920301897_spec = {
-  "data": [
-    {
-      "name": ".0",
-      "format": {
-        "type": "csv",
-        "parse": {
-          "GDP": "number",
-          "GDP_percap": "number"
-        }
-      },
-      "values": "\"Area\",\"GDP\",\"GDP_percap\"\n\"Dublin Region\",7.24e+10,57200\n\"South-West Region\",3.23e+10,48500\n\"West Region\",1.38e+10,31500\n\"Mid-West Region\",1.14e+10,30300\n\"South-East Region\",1.28e+10,25600\n\"Mid-East Region\",1.33e+10,24700\n\"Border Region\",1.07e+10,21100\n\"Midlands Region\",5.7e+09,20100"
-    },
-    {
-      "name": "scale/fill",
-      "format": {
-        "type": "csv",
-        "parse": {}
-      },
-      "values": "\"domain\"\n\"Border Region\"\n\"Dublin Region\"\n\"Mid-East Region\"\n\"Mid-West Region\"\n\"Midlands Region\"\n\"South-East Region\"\n\"South-West Region\"\n\"West Region\""
-    },
-    {
-      "name": "scale/x",
-      "format": {
-        "type": "csv",
-        "parse": {
-          "domain": "number"
-        }
-      },
-      "values": "\"domain\"\n2.365e+09\n7.5735e+10"
-    },
-    {
-      "name": "scale/y",
-      "format": {
-        "type": "csv",
-        "parse": {
-          "domain": "number"
-        }
-      },
-      "values": "\"domain\"\n18245\n59055"
-    }
-  ],
-  "scales": [
-    {
-      "name": "fill",
-      "type": "ordinal",
-      "domain": {
-        "data": "scale/fill",
-        "field": "data.domain"
-      },
-      "points": true,
-      "sort": false,
-      "range": "category10"
-    },
-    {
-      "name": "x",
-      "domain": {
-        "data": "scale/x",
-        "field": "data.domain"
-      },
-      "zero": false,
-      "nice": false,
-      "clamp": false,
-      "range": "width"
-    },
-    {
-      "name": "y",
-      "domain": {
-        "data": "scale/y",
-        "field": "data.domain"
-      },
-      "zero": false,
-      "nice": false,
-      "clamp": false,
-      "range": "height"
-    }
-  ],
-  "marks": [
-    {
-      "type": "symbol",
-      "properties": {
-        "update": {
-          "size": {
-            "value": 50
-          },
-          "fill": {
-            "scale": "fill",
-            "field": "data.Area"
-          },
-          "x": {
-            "scale": "x",
-            "field": "data.GDP"
-          },
-          "y": {
-            "scale": "y",
-            "field": "data.GDP_percap"
-          }
-        },
-        "ggvis": {
-          "data": {
-            "value": ".0"
-          }
-        }
-      },
-      "from": {
-        "data": ".0"
-      }
-    }
-  ],
-  "legends": [
-    {
-      "orient": "right",
-      "fill": "fill",
-      "title": "Area"
-    }
-  ],
-  "axes": [
-    {
-      "type": "x",
-      "scale": "x",
-      "orient": "bottom",
-      "title": "GDP",
-      "ticks": 3,
-      "layer": "back",
-      "grid": true
-    },
-    {
-      "type": "y",
-      "scale": "y",
-      "orient": "left",
-      "title": "GDP per capita",
-      "titleOffset": 60,
-      "ticks": 5,
-      "layer": "back",
-      "grid": true
-    },
-    {
-      "type": "x",
-      "scale": "x",
-      "orient": "top",
-      "title": "Regions in Ireland: Population and GDP per capita",
-      "ticks": 0,
-      "layer": "back",
-      "grid": true,
-      "properties": {
-        "labels": {
-          "fontSize": {
-            "value": 0
-          }
-        },
-        "axis": {
-          "stroke": {
-            "value": "white"
-          }
-        }
-      }
-    }
-  ],
-  "padding": null,
-  "ggvis_opts": {
-    "keep_aspect": false,
-    "resizable": true,
-    "padding": {},
-    "duration": 250,
-    "renderer": "svg",
-    "hover_duration": 0,
-    "width": 672,
-    "height": 480
-  },
-  "handlers": null
-};
-ggvis.getPlot("plot_id920301897").parseSpec(plot_id920301897_spec);
-</script><!--/html_preserve-->
+Filter down to just areas in Ireland
+
+
+```r
+em_ROI <- em_tab %>%
+  filter(Country == "ROI") %>% 
+  droplevels()  # drop unused Areas (e.g., Greater Belfast) from legend
+```
+
+```r
+ggplot(em_ROI, aes(x=GDP, y=GDP_percap, colour=Area)) + 
+  geom_point() +
+  ggtitle("Regions in Ireland: \n Population and GDP per capita") +
+  ylab("GDP per capita") +
+  theme_classic() +
+  theme(axis.line.x = element_line(color="black", size = 0.3), # theme_classic() removes axes so draw them back in
+        axis.line.y = element_line(color="black", size = 0.3)) 
+```
+
+![](scrape_files/figure-html/ROI_gdp_ggvis-1.png)<!-- -->
 
 *** 
 # Adventures in Text Munging and Wordclouding  
@@ -727,7 +374,7 @@ Note that just doing `unlist(wiki_text)` doesn't work
 
 ```r
 ireland <- NULL
-for (i in 2:(length(wiki_text))) {   # omit first paragraph
+for (i in 2:(length(wiki_text))) {   # omit first paragraph because it just says "in Europe  (green & dark grey)"
   ireland <- paste(ireland, as.character(wiki_text[i]), sep = ' ')
 }
 ```
@@ -935,5 +582,5 @@ wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
 ---
 title: "scrape.R"
 author: "amanda"
-date: "Thu Sep  8 17:37:18 2016"
+date: "Thu Sep  8 23:47:05 2016"
 ---
