@@ -270,13 +270,15 @@ Graph population and GDP per capita, coloring points by country
 ```
 
 ```r
-ggplot(em_tab, aes(x=Population, y=GDP_percap, colour=Country)) + 
+gdp_by_country_plot <- ggplot(em_tab, aes(x=Population, y=GDP_percap, colour=Country)) + 
   geom_point() +
   ggtitle("Ireland and Northern Ireland: \n Population and GDP per capita") +
   ylab("GDP per capita") +
   theme_classic() +
   theme(axis.line.x = element_line(color="black", size = 0.3), # theme_classic() removes axes so draw them back in
         axis.line.y = element_line(color="black", size = 0.3)) 
+
+print(gdp_by_country_plot)
 ```
 
 ![](scrape_files/figure-html/country_gdp_ggvis-1.png)<!-- -->
@@ -314,13 +316,15 @@ em_ROI <- em_tab %>%
 ```
 
 ```r
-ggplot(em_ROI, aes(x=GDP, y=GDP_percap, colour=Area)) + 
+ROI_plot <- ggplot(em_ROI, aes(x=GDP, y=GDP_percap, colour=Area)) + 
   geom_point() +
   ggtitle("Regions in Ireland: \n Population and GDP per capita") +
   ylab("GDP per capita") +
   theme_classic() +
   theme(axis.line.x = element_line(color="black", size = 0.3), # theme_classic() removes axes so draw them back in
         axis.line.y = element_line(color="black", size = 0.3)) 
+
+print(ROI_plot)
 ```
 
 ![](scrape_files/figure-html/ROI_gdp_ggvis-1.png)<!-- -->
@@ -582,5 +586,5 @@ wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
 ---
 title: "scrape.R"
 author: "amanda"
-date: "Thu Sep  8 23:54:34 2016"
+date: "Fri Sep  9 00:01:29 2016"
 ---

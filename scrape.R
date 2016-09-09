@@ -173,7 +173,7 @@ em_tab
 #              labels = list(fontSize = 0))) 
 
 #+ country_gdp_ggvis
-ggplot(em_tab, aes(x=Population, y=GDP_percap, colour=Country)) + 
+gdp_by_country_plot <- ggplot(em_tab, aes(x=Population, y=GDP_percap, colour=Country)) + 
   geom_point() +
   ggtitle("Ireland and Northern Ireland: \n Population and GDP per capita") +
   ylab("GDP per capita") +
@@ -181,6 +181,7 @@ ggplot(em_tab, aes(x=Population, y=GDP_percap, colour=Country)) +
   theme(axis.line.x = element_line(color="black", size = 0.3), # theme_classic() removes axes so draw them back in
         axis.line.y = element_line(color="black", size = 0.3)) 
 
+print(gdp_by_country_plot)
 
 #' Looks like the ROI is generally more populous and wealthier than Northern Ireland  
 #' What about `Area`s within the ROI?
@@ -209,7 +210,7 @@ em_ROI <- em_tab %>%
   droplevels()  # drop unused Areas (e.g., Greater Belfast) from legend
 
 #+ ROI_gdp_ggvis
-ggplot(em_ROI, aes(x=GDP, y=GDP_percap, colour=Area)) + 
+ROI_plot <- ggplot(em_ROI, aes(x=GDP, y=GDP_percap, colour=Area)) + 
   geom_point() +
   ggtitle("Regions in Ireland: \n Population and GDP per capita") +
   ylab("GDP per capita") +
@@ -217,7 +218,7 @@ ggplot(em_ROI, aes(x=GDP, y=GDP_percap, colour=Area)) +
   theme(axis.line.x = element_line(color="black", size = 0.3), # theme_classic() removes axes so draw them back in
         axis.line.y = element_line(color="black", size = 0.3)) 
 
-
+print(ROI_plot)
 
 
 
