@@ -188,75 +188,58 @@ when we print the table
 em_tab <- as_tibble(em_tab)
 ```
 
-Take out `€` symbols in rows and "bn" for billion in GDP column
+We need to do some string substitutions:  
+-- There's an "m" for million in the first row of the `Population`. We need
+to make it into something that can be parsed as a number.  
+(Since the column is still of type character and not numeric, we
+can just replace it with scientific notation characters.)  
+-- We want to do a similar thing for "bn" for billion in the GDP columns.  
+-- We also want to take out the out `€` symbol  
+So, we'll make a custom `gsub` function returns a tibble.
 
 
 ```r
-em_tab$GDP <- str_replace_all(em_tab$GDP, "€", "")
-em_tab$GDP <- str_replace_all(em_tab$GDP, "bn", "")
-em_tab$GDP_percap <- str_replace_all(em_tab$GDP_percap, "€", "")
+multi_sub <- function(input, output, dat) {
+  result <- dat
+  for (i in 1 : length(input)) {
+    result <- as_tibble(as.data.frame
+                        (sapply(dat, gsub, 
+                                pattern=input[i], replacement=output[i], 
+                                   result)))
+  }
+  result
+}
 ```
 
-There's an "m" for million in the first row of the `Population` 
-column. We need to make the m into something that can be interpreted as
-a number.
-Since the column is still of type charager and not numeric, we
-can just replace it with scientific notation characters with a `gsub`.
+Make our replacements
 
 
 ```r
-em_tab$Population <- em_tab$Population %>% 
-  gsub(" m", "e+06", .) 
+em_tab <- multi_sub(input = " m", output = "e+06", dat = em_tab)
+em_tab <- multi_sub(input = "bn", output = "", dat = em_tab)
+em_tab <- multi_sub(input = "€", output = "", dat = em_tab)
 ```
 
-Take a look at the `Population` vector to make sure our `gsub` worked.
+Our function makes all columns factors, so make the columns 
+we need as numeric (eventually) into characters.
 
 
 ```r
-em_tab$Population  # good
-```
-
-```
-##  [1] "1.3e+06" "670,000" "720,000" "380,000" "340,000" "460,000" "475,000"
-##  [8] "430,000" "430,000" "280,000" "400,000" "280,000"
+em_tab$Population <- as.character(em_tab$Population)
+em_tab$GDP <- as.character(em_tab$GDP)
+em_tab$GDP_percap <- as.character(em_tab$GDP_percap)
 ```
 
 Make that first element of `Population` into standard notation
 
 
 ```r
-em_tab$Population[1] <- as.numeric(em_tab$Population[1])
+em_tab$Population[1] <- as.numeric(em_tab$Population[1]) # we first have to make it numeric
 format(em_tab$Population[1], scientific = TRUE)
 ```
 
 ```
 ## [1] "1300000"
-```
-
-Check out our table
-
-
-```r
-em_tab
-```
-
-```
-## # A tibble: 12 × 6
-##                                  Area Population Country       City   GDP
-## *                               <chr>      <chr>   <chr>      <chr> <chr>
-## 1                       Dublin Region    1300000     ROI     Dublin 72.4 
-## 2                   South-West Region    670,000     ROI       Cork 32.3 
-## 3                     Greater Belfast    720,000      NI    Belfast 20.9 
-## 4                         West Region    380,000     ROI     Galway 13.8 
-## 5                     Mid-West Region    340,000     ROI   Limerick 11.4 
-## 6                   South-East Region    460,000     ROI  Waterford 12.8 
-## 7                     Mid-East Region    475,000     ROI       Bray 13.3 
-## 8                       Border Region    430,000     ROI   Drogheda 10.7 
-## 9            East of Northern Ireland    430,000      NI Ballymeena  9.5 
-## 10                    Midlands Region    280,000     ROI    Athlone  5.7 
-## 11 West and South of Northern Ireland    400,000      NI      Newry  8.4 
-## 12          North of Northern Ireland    280,000      NI      Derry  5.5 
-## # ... with 1 more variables: GDP_percap <chr>
 ```
 
 #### Set variable data types  
@@ -288,7 +271,32 @@ em_tab <- em_tab
 em_tab$GDP <- (em_tab$GDP)*(1e+09)
 ```
 
+Check out our table
 
+
+```r
+kable(em_tab, format = "markdown")
+```
+
+
+
+|Area                               | Population|Country |City       |      GDP| GDP_percap|
+|:----------------------------------|----------:|:-------|:----------|--------:|----------:|
+|Dublin Region                      |    1300000|ROI     |Dublin     | 7.24e+10|      57200|
+|South-West Region                  |     670000|ROI     |Cork       | 3.23e+10|      48500|
+|Greater Belfast                    |     720000|NI      |Belfast    | 2.09e+10|      33550|
+|West Region                        |     380000|ROI     |Galway     | 1.38e+10|      31500|
+|Mid-West Region                    |     340000|ROI     |Limerick   | 1.14e+10|      30300|
+|South-East Region                  |     460000|ROI     |Waterford  | 1.28e+10|      25600|
+|Mid-East Region                    |     475000|ROI     |Bray       | 1.33e+10|      24700|
+|Border Region                      |     430000|ROI     |Drogheda   | 1.07e+10|      21100|
+|East of Northern Ireland           |     430000|NI      |Ballymeena | 9.50e+09|      20300|
+|Midlands Region                    |     280000|ROI     |Athlone    | 5.70e+09|      20100|
+|West and South of Northern Ireland |     400000|NI      |Newry      | 8.40e+09|      19300|
+|North of Northern Ireland          |     280000|NI      |Derry      | 5.50e+09|      18400|
+
+***
+#### Visualize
 Graph population and GDP per capita, coloring points by country
 
 
@@ -599,5 +607,5 @@ wordcloud(i.dat.trim$word, i.dat.trim$freq, random.order = FALSE,
 ---
 title: "scrape.R"
 author: "amanda"
-date: "Fri Sep  9 02:13:53 2016"
+date: "Fri Sep  9 15:11:59 2016"
 ---
